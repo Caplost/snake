@@ -17,89 +17,98 @@
 ## 2. 技术架构
 
 ### 技术选型
-- **语言**: Python 3（跨平台，支持标准库 `curses`）
-- **输入处理**: `curses` 模块捕获键盘事件（非阻塞）
-- **渲染**: 字符画布，刷新终端显示
+- **语言**: Go 1.21+
+- **终端UI**: 标准库 `termbox-go`（跨平台，支持键盘事件和ANSI转义码）
+- **编译**: `go build -o snake ./cmd/snake`
 
 ### 组件设计
 
 ```
-snake_game/
-├── __init__.py       # 包标识
-├── main.py           # 游戏入口，初始化 curses 窗口
-├── game.py           # Game 类：主循环、状态管理
-├── snake.py          # Snake 类：位置、方向、增长逻辑
-├── food.py           # Food 类：食物生成
-├── constants.py      # 常量：网格大小、速度、符号定义
-└── tests/
-    ├── __init__.py
-    ├── test_snake.py
-    ├── test_food.py
-    └── test_game.py
+snake/
+├── cmd/
+│   └── snake/
+│       └── main.go      # 入口，初始化 termbox，主循环
+├── internal/
+│   ├── game/
+│   │   └── game.go      # Game 结构体：状态管理、渲染
+│   ├── snake/
+│   │   └── snake.go     # Snake 结构体：移动、增长、碰撞检测
+│   ├── food/
+│   │   └── food.go      # Food 结构体：随机位置生成
+│   └── constants/
+│       └── constants.go # 常量：网格大小、速度、符号
+└── internal/game/*_test.go  # 单元测试
 ```
 
 ### 数据流
 ```
-键盘输入 → Game.handle_input() → Snake.direction
-                                       ↓
-                             Game.update() → Snake.move()
-                                       ↓
-                             Game.render() → 终端绘制
+键盘输入 → Game.handleInput() → Snake.direction
+                                        ↓
+                              Game.update() → Snake.move()
+                                        ↓
+                              Game.render() → termbox 绘制
 ```
 
 ## 3. 文件变更清单
 
 | 文件 | 操作 | 说明 |
 |------|------|------|
-| `snake_game/__init__.py` | 新建 | 包标识文件 |
-| `snake_game/main.py` | 新建 | 入口，curses 初始化，main() 函数 |
-| `snake_game/game.py` | 新建 | Game 类：主循环、状态管理、渲染 |
-| `snake_game/snake.py` | 新建 | Snake 类：移动、增长、碰撞检测 |
-| `snake_game/food.py` | 新建 | Food 类：随机位置生成 |
-| `snake_game/constants.py` | 新建 | 常量：网格大小(20)、速度(100ms)、符号 |
-| `snake_game/tests/__init__.py` | 新建 | 测试包标识 |
-| `snake_game/tests/test_snake.py` | 新建 | 蛇移动/增长/碰撞测试 |
-| `snake_game/tests/test_food.py` | 新建 | 食物生成测试 |
-| `snake_game/tests/test_game.py` | 新建 | 分数/游戏结束测试 |
+| `snake/cmd/snake/main.go` | 新建 | 入口，termbox 初始化，main() |
+| `snake/internal/constants/constants.go` | 新建 | 常量：GridSize(20)、Tick(100ms)、Symbols |
+| `snake/internal/snake/snake.go` | 新建 | Snake 结构体：Move/Grow/CheckCollision |
+| `snake/internal/food/food.go` | 新建 | Food 结构体：Generate |
+| `snake/internal/game/game.go` | 新建 | Game 结构体：主循环、状态、渲染 |
+| `snake/internal/game/game_test.go` | 新建 | 单元测试 |
+| `snake/internal/snake/snake_test.go` | 新建 | 单元测试 |
+| `snake/internal/food/food_test.go` | 新建 | 单元测试 |
+| `snake/go.mod` | 新建 | go.mod 文件 |
 
 ## 4. 数据模型
 
-### Snake 类
-```python
-body: List[Tuple[int, int]]   # [(x,y), ...] 蛇身坐标列表，头在前
-direction: Tuple[int, int]    # (dx, dy) 方向向量，如 (1,0) 表示向右
+### Snake
+```go
+type Point struct { X, Y int }
+
+type Snake struct {
+    body      []Point      // 蛇身坐标列表，头在 body[0]
+    direction Point        // 方向向量，如 (1,0) 表示向右
+}
 ```
 
-### Food 类
-```python
-position: Tuple[int, int]     # (x, y) 食物坐标
+### Food
+```go
+type Food struct {
+    position Point         // 食物坐标
+}
 ```
 
 ### Game 状态
-```python
-score: int       # 当前分数
-game_over: bool  # 游戏是否结束
-snake: Snake     # 蛇对象
-food: Food       # 食物对象
+```go
+type Game struct {
+    score    int
+    gameOver bool
+    snake    Snake
+    food     Food
+}
 ```
 
 ## 5. 测试策略
 
 ### 单元测试
-- `test_snake.py`: 测试蛇移动(head位置更新)、增长(吃食物后长度+1)、180度反向移动拒绝、自身碰撞检测
-- `test_food.py`: 测试食物生成位置不与蛇身重叠
-- `test_game.py`: 测试分数计算(吃食物+10)、游戏结束条件(撞墙/撞自己)
+- `snake_test.go`: 测试蛇移动、增长、180度反向拒绝、自身碰撞
+- `food_test.go`: 测试食物生成位置不与蛇身重叠
+- `game_test.go`: 测试分数计算(吃食物+10)、游戏结束条件
 
 ### 运行测试
 ```bash
-python -m pytest snake_game/tests/ -v
+go test ./internal/... -v
 ```
 
 ## 6. 边缘情况与约束
 
 ### 约束
 - 仅支持支持 ANSI 转义码的终端（Linux/macOS/Windows Terminal）
-- Python 3.6+
+- Go 1.21+
 
 ### 边缘情况处理
 | 情况 | 处理方式 |
@@ -112,7 +121,7 @@ python -m pytest snake_game/tests/ -v
 ## 7. 交互流程
 
 ```
-启动 → 显示游戏网格和初始蛇 → 游戏循环:
+启动 → 初始化 termbox → 显示游戏网格和初始蛇 → 游戏循环:
   → 捕获键盘输入
   → 更新蛇位置
   → 检测碰撞(墙/自身)
@@ -121,3 +130,13 @@ python -m pytest snake_game/tests/ -v
   → 循环直到游戏结束
 游戏结束 → 显示 Game Over 和分数 → 等待 R 键 → 重新开始
 ```
+
+## 8. Go vs Python 权衡
+
+| 因素 | Go (本计划) | Python (原计划) |
+|------|-------------|-----------------|
+| 编译/运行 | 需编译，交叉编译简单 | 解释执行，无需编译 |
+| 依赖 | termbox-go 一个依赖 | 标准库 curses，无需依赖 |
+| 性能 | 更快，CPU 密集无压力 | 足够，CLI 游戏不敏感 |
+| 分发 | 单一二进制文件 | 需 Python 环境 |
+| **推荐** | **更适合 CLI 工具** | 适合原型快速验证 |
