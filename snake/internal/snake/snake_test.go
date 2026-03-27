@@ -54,3 +54,17 @@ func TestSnakeOccupies(t *testing.T) {
 		t.Error("Snake should not occupy position (6,6)")
 	}
 }
+
+func TestSnakeSelfCollision(t *testing.T) {
+	s := New(5, 5)
+	s.SetDirection(Point{X: 1, Y: 0})
+	// Grow snake to length 3
+	s.Grow()
+	s.Grow()
+	// Now body should be: [head at (5,5), (4,5), (3,5)]
+	// Force a self-collision scenario by manually creating overlapping segments
+	s.body = []Point{{X: 5, Y: 5}, {X: 5, Y: 5}, {X: 4, Y: 5}}
+	if !s.CheckSelfCollision() {
+		t.Error("Expected self collision when head overlaps with body")
+	}
+}

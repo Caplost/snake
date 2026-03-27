@@ -21,6 +21,17 @@ func TestScoreIncrease(t *testing.T) {
 	}
 }
 
+func TestScoreIncreaseOnEatingFood(t *testing.T) {
+	g := New()
+	initialScore := g.score
+	head := g.snake.Head()
+	g.food = food.New(head.X, head.Y)
+	g.Update()
+	if g.score != initialScore+10 {
+		t.Errorf("Score should increase by 10 when eating food, got %d", g.score)
+	}
+}
+
 func TestGameOverOnWallCollision(t *testing.T) {
 	s := snake.New(0, 0)
 	s.SetDirection(snake.Point{X: -1, Y: 0})

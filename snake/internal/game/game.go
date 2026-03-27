@@ -104,13 +104,21 @@ func (g *Game) Update() {
 func (g *Game) Render() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 
-	for x := 0; x <= constants.GridSize; x++ {
-		termbox.SetCell(x, 0, constants.BorderSymbol, termbox.ColorWhite, termbox.ColorDefault)
-		termbox.SetCell(x, constants.GridSize, constants.BorderSymbol, termbox.ColorWhite, termbox.ColorDefault)
+	// Draw corners
+	termbox.SetCell(0, 0, constants.CornerSymbol, termbox.ColorWhite, termbox.ColorDefault)
+	termbox.SetCell(constants.GridSize, 0, constants.CornerSymbol, termbox.ColorWhite, termbox.ColorDefault)
+	termbox.SetCell(0, constants.GridSize, constants.CornerSymbol, termbox.ColorWhite, termbox.ColorDefault)
+	termbox.SetCell(constants.GridSize, constants.GridSize, constants.CornerSymbol, termbox.ColorWhite, termbox.ColorDefault)
+
+	// Draw horizontal borders (top and bottom)
+	for x := 1; x < constants.GridSize; x++ {
+		termbox.SetCell(x, 0, constants.HorizontalBorder, termbox.ColorWhite, termbox.ColorDefault)
+		termbox.SetCell(x, constants.GridSize, constants.HorizontalBorder, termbox.ColorWhite, termbox.ColorDefault)
 	}
-	for y := 0; y <= constants.GridSize; y++ {
-		termbox.SetCell(0, y, constants.BorderSymbol, termbox.ColorWhite, termbox.ColorDefault)
-		termbox.SetCell(constants.GridSize, y, constants.BorderSymbol, termbox.ColorWhite, termbox.ColorDefault)
+	// Draw vertical borders (left and right)
+	for y := 1; y < constants.GridSize; y++ {
+		termbox.SetCell(0, y, constants.VerticalBorder, termbox.ColorWhite, termbox.ColorDefault)
+		termbox.SetCell(constants.GridSize, y, constants.VerticalBorder, termbox.ColorWhite, termbox.ColorDefault)
 	}
 
 	for _, p := range g.snake.Body() {
