@@ -6,7 +6,8 @@
 在终端运行的贪吃蛇游戏，支持方向键控制、计分、游戏结束/重新开始。
 
 ### 功能验收标准
-- [ ] 20x20 游戏网格，蛇用 `█` 表示，食物用 `*` 表示
+- [ ] 20x20 游戏网格，**带 ASCII 边框**（角 `+`，边 `-` `|`）
+- [ ] 蛇用 `█` 表示，食物用 `*` 表示
 - [ ] 方向键或 WASD 控制蛇移动方向
 - [ ] 蛇吃食物后长度+1，分数+10
 - [ ] 撞墙或撞自己时游戏结束，显示 "Game Over" 和最终分数
@@ -54,7 +55,7 @@ snake/
 | 文件 | 操作 | 说明 |
 |------|------|------|
 | `snake/cmd/snake/main.go` | 新建 | 入口，termbox 初始化，main() |
-| `snake/internal/constants/constants.go` | 新建 | 常量：GridSize(20)、Tick(100ms)、Symbols |
+| `snake/internal/constants/constants.go` | 新建 | 常量：GridSize(20)、Tick(100ms)、Symbols、BorderChars |
 | `snake/internal/snake/snake.go` | 新建 | Snake 结构体：Move/Grow/CheckCollision |
 | `snake/internal/food/food.go` | 新建 | Food 结构体：Generate |
 | `snake/internal/game/game.go` | 新建 | Game 结构体：主循环、状态、渲染 |
@@ -121,7 +122,7 @@ go test ./internal/... -v
 ## 7. 交互流程
 
 ```
-启动 → 初始化 termbox → 显示游戏网格和初始蛇 → 游戏循环:
+启动 → 初始化 termbox → 显示带边框的游戏网格和初始蛇 → 游戏循环:
   → 捕获键盘输入
   → 更新蛇位置
   → 检测碰撞(墙/自身)
@@ -130,6 +131,30 @@ go test ./internal/... -v
   → 循环直到游戏结束
 游戏结束 → 显示 Game Over 和分数 → 等待 R 键 → 重新开始
 ```
+
+## 8. UI 布局
+
+```
+┌─────────────────────────────────────┐
+│          SNAKE GAME                 │
+│  ┌───────────────────────────────┐  │
+│  │                               │  │
+│  │      20x20 游戏网格区域        │  │
+│  │                               │  │
+│  │                               │  │
+│  └───────────────────────────────┘  │
+│         Score: 0                     │
+│    Press WASD/Arrows to move        │
+└─────────────────────────────────────┘
+```
+
+### 边框设计
+- **外框**: ASCII 艺术边框，`+` 四角，`-` 水平边，`|` 垂直边
+- **网格**: 20x20 空格区域，蛇和食物叠加其上
+- **信息区**: 分数显示在网格下方
+- **提示**: 操作说明在底部
+
+## 9. Go vs Python 权衡
 
 ## 8. Go vs Python 权衡
 
