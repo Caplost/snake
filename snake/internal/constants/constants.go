@@ -5,7 +5,6 @@ const (
 	TickMs            = 100
 	SnakeSymbol       = '█'
 	FoodSymbol        = '*'
-	EmptySymbol       = ' '
 	CornerSymbol      = '+'
 	HorizontalBorder  = '-'
 	VerticalBorder    = '|'

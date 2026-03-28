@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 
 	"snake/internal/constants"
@@ -17,10 +18,11 @@ type Game struct {
 	gameOver bool
 	snake    *snake.Snake
 	food     *food.Food
+	mu       sync.Mutex
+	wg       sync.WaitGroup
 }
 
 func New() *Game {
-	rand.Seed(time.Now().UnixNano())
 	s := snake.New(constants.GridSize/2, constants.GridSize/2)
 	f := food.New(0, 0)
 	f.Generate(constants.GridSize, s)
@@ -35,7 +37,15 @@ func (g *Game) Score() int {
 }
 
 func (g *Game) GameOver() bool {
+	g.mu.Lock()
+	defer g.mu.Unlock()
 	return g.gameOver
+}
+
+func (g *Game) setGameOver(val bool) {
+	g.mu.Lock()
+	g.gameOver = val
+	g.mu.Unlock()
 }
 
 func (g *Game) HandleInput() {
@@ -51,9 +61,9 @@ func (g *Game) HandleInput() {
 		case termbox.KeyArrowRight:
 			g.trySetDirection(snake.Point{X: 1, Y: 0})
 		case termbox.KeyCtrlC, termbox.KeyEsc:
-			g.gameOver = true
+			g.setGameOver(true)
 		}
-		if g.gameOver && (ev.Ch == 'r' || ev.Ch == 'R') {
+		if g.GameOver() && (ev.Ch == 'r' || ev.Ch == 'R') {
 			g.reset()
 		}
 		switch ev.Ch {
@@ -66,7 +76,7 @@ func (g *Game) HandleInput() {
 		case 'd', 'D':
 			g.trySetDirection(snake.Point{X: 1, Y: 0})
 		case 'r', 'R':
-			if g.gameOver {
+			if g.GameOver() {
 				g.reset()
 			}
 		}
@@ -74,6 +84,8 @@ func (g *Game) HandleInput() {
 }
 
 func (g *Game) trySetDirection(d snake.Point) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
 	if g.snake.CheckReverseDirection(d) {
 		return
 	}
@@ -81,12 +93,12 @@ func (g *Game) trySetDirection(d snake.Point) {
 }
 
 func (g *Game) Update() {
-	if g.gameOver {
+	if g.GameOver() {
 		return
 	}
 
 	if g.snake.CheckWallCollision(constants.GridSize) || g.snake.CheckSelfCollision() {
-		g.gameOver = true
+		g.setGameOver(true)
 		return
 	}
 
@@ -128,7 +140,7 @@ func (g *Game) Render() {
 	foodPos := g.food.Position()
 	termbox.SetCell(foodPos.X+1, foodPos.Y+1, constants.FoodSymbol, termbox.ColorRed, termbox.ColorDefault)
 
-	if g.gameOver {
+	if g.GameOver() {
 		msg := fmt.Sprintf("Game Over! Score: %d. Press R to restart", g.score)
 		for i, c := range msg {
 			termbox.SetCell(constants.GridSize/2-10+i, constants.GridSize/2, c, termbox.ColorYellow, termbox.ColorDefault)
@@ -144,10 +156,13 @@ func (g *Game) Render() {
 }
 
 func (g *Game) reset() {
+	rand.Seed(time.Now().UnixNano())
+	g.mu.Lock()
 	g.snake = snake.New(constants.GridSize/2, constants.GridSize/2)
 	g.food.Generate(constants.GridSize, g.snake)
 	g.score = 0
 	g.gameOver = false
+	g.mu.Unlock()
 }
 
 func (g *Game) Run() {
@@ -163,8 +178,10 @@ func (g *Game) Run() {
 	ticker := time.NewTicker(time.Duration(constants.TickMs) * time.Millisecond)
 	defer ticker.Stop()
 
+	g.wg.Add(1)
 	go func() {
-		for !g.gameOver {
+		defer g.wg.Done()
+		for !g.GameOver() {
 			g.HandleInput()
 			time.Sleep(16 * time.Millisecond)
 		}
@@ -172,7 +189,7 @@ func (g *Game) Run() {
 
 	for {
 		g.Render()
-		if g.gameOver {
+		if g.GameOver() {
 			for {
 				ev := termbox.PollEvent()
 				if ev.Type == termbox.EventKey && (ev.Ch == 'r' || ev.Ch == 'R' || ev.Key == termbox.KeyCtrlC || ev.Key == termbox.KeyEsc) {
@@ -180,6 +197,7 @@ func (g *Game) Run() {
 						g.reset()
 						break
 					}
+					g.wg.Wait()
 					return
 				}
 			}
