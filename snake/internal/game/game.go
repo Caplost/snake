@@ -19,7 +19,6 @@ type Game struct {
 	snake    *snake.Snake
 	food     *food.Food
 	mu       sync.Mutex
-	wg       sync.WaitGroup
 }
 
 func New() *Game {
@@ -48,37 +47,35 @@ func (g *Game) setGameOver(val bool) {
 	g.mu.Unlock()
 }
 
-func (g *Game) HandleInput() {
-	ev := termbox.PollEvent()
-	if ev.Type == termbox.EventKey {
-		switch ev.Key {
-		case termbox.KeyArrowUp:
-			g.trySetDirection(snake.Point{X: 0, Y: -1})
-		case termbox.KeyArrowDown:
-			g.trySetDirection(snake.Point{X: 0, Y: 1})
-		case termbox.KeyArrowLeft:
-			g.trySetDirection(snake.Point{X: -1, Y: 0})
-		case termbox.KeyArrowRight:
-			g.trySetDirection(snake.Point{X: 1, Y: 0})
-		case termbox.KeyCtrlC, termbox.KeyEsc:
-			g.setGameOver(true)
-		}
-		if g.GameOver() && (ev.Ch == 'r' || ev.Ch == 'R') {
+func (g *Game) handleKeyEvent(ev termbox.Event) {
+	if ev.Type != termbox.EventKey {
+		return
+	}
+	switch ev.Key {
+	case termbox.KeyArrowUp:
+		g.trySetDirection(snake.Point{X: 0, Y: -1})
+	case termbox.KeyArrowDown:
+		g.trySetDirection(snake.Point{X: 0, Y: 1})
+	case termbox.KeyArrowLeft:
+		g.trySetDirection(snake.Point{X: -1, Y: 0})
+	case termbox.KeyArrowRight:
+		g.trySetDirection(snake.Point{X: 1, Y: 0})
+	case termbox.KeyCtrlC, termbox.KeyEsc:
+		g.setGameOver(true)
+		return
+	}
+	switch ev.Ch {
+	case 'w', 'W':
+		g.trySetDirection(snake.Point{X: 0, Y: -1})
+	case 's', 'S':
+		g.trySetDirection(snake.Point{X: 0, Y: 1})
+	case 'a', 'A':
+		g.trySetDirection(snake.Point{X: -1, Y: 0})
+	case 'd', 'D':
+		g.trySetDirection(snake.Point{X: 1, Y: 0})
+	case 'r', 'R':
+		if g.GameOver() {
 			g.reset()
-		}
-		switch ev.Ch {
-		case 'w', 'W':
-			g.trySetDirection(snake.Point{X: 0, Y: -1})
-		case 's', 'S':
-			g.trySetDirection(snake.Point{X: 0, Y: 1})
-		case 'a', 'A':
-			g.trySetDirection(snake.Point{X: -1, Y: 0})
-		case 'd', 'D':
-			g.trySetDirection(snake.Point{X: 1, Y: 0})
-		case 'r', 'R':
-			if g.GameOver() {
-				g.reset()
-			}
 		}
 	}
 }
@@ -170,38 +167,36 @@ func (g *Game) Run() {
 		panic(err)
 	}
 	defer termbox.Close()
-
 	termbox.SetInputMode(termbox.InputEsc)
-
 	g.reset()
 
 	ticker := time.NewTicker(time.Duration(constants.TickMs) * time.Millisecond)
 	defer ticker.Stop()
 
-	g.wg.Add(1)
-	go func() {
-		defer g.wg.Done()
-		for !g.GameOver() {
-			g.HandleInput()
-			time.Sleep(16 * time.Millisecond)
-		}
-	}()
-
 	for {
 		g.Render()
+
+		// Event-driven input (blocking)
+		ev := termbox.PollEvent()
+		g.handleKeyEvent(ev)
+
+		// Check for exit
 		if g.GameOver() {
+			// Wait for user to press R to restart or Esc/Ctrl+C to exit
 			for {
 				ev := termbox.PollEvent()
-				if ev.Type == termbox.EventKey && (ev.Ch == 'r' || ev.Ch == 'R' || ev.Key == termbox.KeyCtrlC || ev.Key == termbox.KeyEsc) {
+				if ev.Type == termbox.EventKey {
 					if ev.Ch == 'r' || ev.Ch == 'R' {
 						g.reset()
 						break
 					}
-					g.wg.Wait()
-					return
+					if ev.Key == termbox.KeyCtrlC || ev.Key == termbox.KeyEsc {
+						return
+					}
 				}
 			}
 		}
+
 		<-ticker.C
 		g.Update()
 	}
