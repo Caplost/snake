@@ -131,7 +131,7 @@ func (g *Game) Render() {
 	}
 
 	for _, p := range g.snake.Body() {
-		termbox.SetCell(p.X+1, p.Y+1, constants.SnakeSymbol, termbox.ColorGreen, termbox.ColorDefault)
+		termbox.SetCell(p.X+1, p.Y+1, constants.SnakeSymbol, termbox.ColorYellow, termbox.ColorDefault)
 	}
 
 	foodPos := g.food.Position()
