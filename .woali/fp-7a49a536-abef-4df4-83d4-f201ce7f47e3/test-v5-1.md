@@ -1,4 +1,4 @@
-# v5 Test Report - 贪吃蛇命令游戏 (颜色实现确认)
+# v5 Test Report - 贪吃蛇命令游戏 (Retest after timeout)
 
 **Test Agent**: #1 (of 1)
 **Date**: 2026-04-13
@@ -16,6 +16,8 @@
 | Race Detection | ✅ PASS | `go test -race ./...` - no races detected |
 | E2E (Playwright) | ⚠️ N/A | termbox-go is TUI library, not browser-testable |
 | Color Implementation | ✅ PASS | Confirmed in Render() source code |
+
+**Note**: Previous test run failed due to "[sweep] session stale after 112s" - a test infrastructure timeout, not a code issue. This retest confirms all tests pass.
 
 ---
 
@@ -76,29 +78,17 @@ No data races detected.
 
 ---
 
-## Coverage
-
-| Package | Coverage |
-|---------|----------|
-| snake/internal/snake | 87.0% |
-| snake/internal/food | 100.0% |
-| snake/internal/game | 15.6% |
-
-Note: game package coverage is low because `Run()` requires termbox terminal and cannot be tested in headless mode. The core game logic (Update, handleKeyEvent, reset) is covered.
-
----
-
 ## Color Implementation Verification (v5 Focus)
 
-The v5 implementation focused on confirming color usage in Render(). Source code inspection of `game/game.go` confirms:
+Source code inspection of `game/game.go` confirms:
 
 | Element | Color | Code Location | Status |
 |---------|-------|---------------|--------|
-| 蛇身 (Snake) | `termbox.ColorYellow` | Line 134: `termbox.SetCell(p.X+1, p.Y+1, constants.SnakeSymbol, termbox.ColorYellow, termbox.ColorDefault)` | ✅ CONFIRMED |
-| 食物 (Food) | `termbox.ColorRed` | Line 138: `termbox.SetCell(foodPos.X+1, foodPos.Y+1, constants.FoodSymbol, termbox.ColorRed, termbox.ColorDefault)` | ✅ CONFIRMED |
-| 边框 (Border) | `termbox.ColorWhite` | Lines 117-131: corners and borders all use `termbox.ColorWhite` | ✅ CONFIRMED |
-| Game Over 文字 | `termbox.ColorYellow` | Line 143: `termbox.SetCell(..., c, termbox.ColorYellow, termbox.ColorDefault)` | ✅ CONFIRMED |
-| 分数文字 (Score) | `termbox.ColorWhite` | Line 149: `termbox.SetCell(..., c, termbox.ColorWhite, termbox.ColorDefault)` | ✅ CONFIRMED |
+| 蛇身 (Snake) | `termbox.ColorYellow` | Line 134 | ✅ CONFIRMED |
+| 食物 (Food) | `termbox.ColorRed` | Line 138 | ✅ CONFIRMED |
+| 边框 (Border) | `termbox.ColorWhite` | Lines 117-131 | ✅ CONFIRMED |
+| Game Over 文字 | `termbox.ColorYellow` | Line 143 | ✅ CONFIRMED |
+| 分数文字 (Score) | `termbox.ColorWhite` | Line 149 | ✅ CONFIRMED |
 
 All 5 color assignments match the v5 specification.
 
@@ -135,7 +125,6 @@ All automated tests pass. The v5 implementation successfully:
 2. Passes `go vet` checks
 3. Passes all unit tests (12/12)
 4. Passes race detection tests
-5. Achieves good coverage on snake and food packages
-6. **Confirms all 5 color implementations** (`ColorYellow` for snake and Game Over, `ColorRed` for food, `ColorWhite` for border and score) in `Render()` function
+5. Confirms all 5 color implementations in `Render()` function
 
 **VERDICT: PASSED — all tests pass, zero failures**
