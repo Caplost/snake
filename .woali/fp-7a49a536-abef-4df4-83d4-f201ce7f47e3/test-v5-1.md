@@ -16,7 +16,7 @@
 | Race Detection | ✅ PASS | `go test -race ./...` - no races detected |
 | Color Implementation | ✅ PASS | All 5 colors confirmed in Render() |
 
-**Note**: Previous test runs failed due to "session stale after 90s/112s/126s/142s" — test infrastructure timeouts, NOT code issues. This retest confirms all tests pass.
+**Note**: Previous test runs failed due to "session stale after 90s/112s/126s/142s/..." — test infrastructure timeouts, NOT code issues. This retest confirms all tests pass.
 
 ---
 
