@@ -2,6 +2,8 @@
 # E2E Screenshot Script for Snake Game
 # Records terminal session to prove game runs correctly
 # Usage: ./e2e-screenshot.sh
+#
+# Compatible with both Linux (script -f) and macOS (script -F)
 
 set -e
 
@@ -17,21 +19,30 @@ TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 OUTPUT_FILE="$SCREENSHOTS_DIR/${TIMESTAMP}-snake-gameplay.cast"
 
 echo "Recording snake game session to $OUTPUT_FILE"
-echo "Press Ctrl+C to stop early, or wait 10 seconds for auto-stop"
+echo "Recording for 3 seconds..."
+
+# Determine platform and appropriate script flags
+if [[ "$(uname)" == "Darwin" ]]; then
+    # macOS: use -F for flush (different semantics than Linux -f)
+    SCRIPT_FLAGS="-F"
+else
+    # Linux: use -f for force flush
+    SCRIPT_FLAGS="-f"
+fi
 
 # Check if asciinema is available (preferred)
 if command -v asciinema &> /dev/null; then
-    asciinema rec "$OUTPUT_FILE" --overwrite --timeout 10 &
+    asciinema rec "$OUTPUT_FILE" --overwrite --timeout 3 &
     PID=$!
-    sleep 10
+    sleep 3
     kill $PID 2>/dev/null || true
     echo "Recording saved to $OUTPUT_FILE"
 else
-    # Fallback: use script command
+    # Fallback: use script command with platform-specific flags
     if command -v script &> /dev/null; then
-        script -q -f "$OUTPUT_FILE" &
+        script $SCRIPT_FLAGS -q "$OUTPUT_FILE" &
         PID=$!
-        sleep 10
+        sleep 3
         kill $PID 2>/dev/null || true
         echo "Recording saved to $OUTPUT_FILE"
     else

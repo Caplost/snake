@@ -23,8 +23,8 @@ fi
 echo "Recording snake game session with asciinema..."
 echo "Recording to: $OUTPUT_FILE"
 
-# Record for 10 seconds with idle time limit of 2 seconds
-asciinema rec "$OUTPUT_FILE" --overwrite --timeout 10 --idle-time-limit 2
+# Record for 3 seconds with idle time limit of 1 second
+asciinema rec "$OUTPUT_FILE" --overwrite --timeout 3 --idle-time-limit 1
 
 echo "Recording saved to $OUTPUT_FILE"
 echo "View with: asciinema play $OUTPUT_FILE"
