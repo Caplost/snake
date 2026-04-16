@@ -1,5 +1,5 @@
 {
-  "pipelineId": "fp-7a49a536-abef-4df4-83d4-f201ce7f47e3",
-  "stage": "test",
+  "pipelineId": "fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97",
+  "stage": "plan",
   "apiUrl": "http://127.0.0.1:5100"
 }
