@@ -1277,4 +1277,16 @@ After coding, commit and push your changes.^[/exitIMPORTANT: Before starting any
 [2026-04-17T09:15:23.643Z] <<< Claude (thinking)
   Done. Let me summarize what was accomplished.
 
-[?1006l[?1003l[?1002l[?1000l[>4m[<u[?1004l[?2004l[?25h[?25h
+[?1006l[?1003l[?1002l[?1000l[>4m[<u[?1004l[?2004l[?25h[?25hIMPORTANT: Before starting any work, run `git pull` to sync the latest code and result files committed by other agents.
+
+You are the Coder agent for sub-feature "live-verdict-screenshot-check" (version v5).
+Before coding, read all shared repository rules from .woali/repo-rules/.
+Read the plan from .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v5.md and implement the code.
+Run self-verification before finishing: lint, type-check, and relevant tests.
+Write an implementation report to .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/code-v5.md.
+Write a complete test specification to .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/test-spec-v5.md. This file is the primary input for the Test agent.
+The test specification must include unit coverage, integration/E2E scenarios, expected results, environment/setup notes, and Playwright coverage when this repo uses Playwright.
+After coding, commit and push your changes.
+
+## Loop-back handoff
+You are re-entering Code because a later stage rejected this it
