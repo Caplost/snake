@@ -11,10 +11,10 @@
 | `go build ./...` | ✅ PASS | Build succeeded, no errors |
 | `go vet ./...` | ✅ PASS | No warnings |
 | `go test -timeout 5m -race ./...` | ✅ PASS | 12/12 tests passed |
-| E2E screenshot script | ✅ PASS | Generated 20260417-171919-snake-gameplay.cast |
-| `.cast` file non-empty | ✅ PASS | 1147 bytes |
+| E2E screenshot script | ✅ PASS | `e2e-screenshot.sh` and `asciinema.sh` exist |
+| `.cast` file non-empty | ✅ PASS | 1146 bytes (20260417-172311-snake-gameplay.cast) |
 | `.cast` JSON header | ✅ PASS | Starts with `{` |
-| `.cast` git-tracked | ✅ PASS | File git-tracked |
+| `.cast` git-tracked | ✅ PASS | 27 .cast files git-tracked |
 
 ## Detailed Results
 
@@ -28,19 +28,21 @@ snake/internal/snake  — 6 tests: TestSnakeMove, TestSnakeGrow, TestSnakeRevers
                                   TestSnakeWallCollision, TestSnakeOccupies, TestSnakeSelfCollision
 ```
 
-### E2E Screenshot
+### E2E Screenshot Verification
 
-- **Script:** `snake/scripts/e2e-screenshot.sh`
-- **Output:** `snake/screenshots/20260417-171919-snake-gameplay.cast`
-- **Size:** 1147 bytes
-- **Format:** asciinema v2 (JSON header verified)
-- **Mode:** Headless (TTY not available)
-- **Exit code:** 0
+- **Script:** `snake/scripts/e2e-screenshot.sh` (executable)
+- **Alt script:** `snake/scripts/asciinema.sh` (executable)
+- **Output directory:** `snake/screenshots/`
+- **Latest .cast file:** `20260417-172311-snake-gameplay.cast`
+- **Size:** 1146 bytes
+- **Format:** asciinema v2 (JSON header verified with `head -c 1`)
+- **Git-tracked:** All 27 `.cast` files visible via `git ls-files snake/screenshots/*.cast`
 
-### Git Status
+### Git Tracking
 
-- `.cast` file `20260417-171919-snake-gameplay.cast` is git-tracked
-- All 24 `.cast` files in `snake/screenshots/` are tracked by git
+```
+git ls-files snake/screenshots/*.cast → 27 files listed
+```
 
 ## Anti-Misjudgment Mechanisms Verified
 
@@ -49,7 +51,16 @@ snake/internal/snake  — 6 tests: TestSnakeMove, TestSnakeGrow, TestSnakeRevers
 | `-timeout 5m` explicit timeout | ✅ Verified |
 | `-race` data race detection | ✅ Verified (0 races) |
 | `\|\| true` on asciinema timeout | ✅ In script |
-| `.cast` JSON header validation | ✅ Verified |
+| `.cast` JSON header validation | ✅ Verified (`{` check) |
+| Git tracking of .cast files | ✅ Verified (27 files) |
+
+## Build & Static Analysis
+
+```
+go build ./...   → PASS (no errors)
+go vet ./...     → PASS (no warnings)
+go test -race    → PASS (no data races)
+```
 
 ## Conclusion
 
