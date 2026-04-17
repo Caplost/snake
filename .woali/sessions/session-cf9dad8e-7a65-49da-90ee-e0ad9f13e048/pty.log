@@ -3,3 +3,1011 @@ Not logged in · Please run /login
 [?1006l[?1003l[?1002l[?1000l[>4m[<u[?1004l[?2004l[?25h[?25hNot logged in · Please run /login
 [?1006l[?1003l[?1002l[?1000l[>4m[<u[?1004l[?2004l[?25h[?25hNot logged in · Please run /login
 [?1006l[?1003l[?1002l[?1000l[>4m[<u[?1004l[?2004l[?25h[?25h
+=== woali-rebuild 2026-04-17T08:02:04.679Z claudeSessionId=ca83b889-e86f-4cfa-8d83-ffe9df31be47 transcript=/Users/wangyinneng/.claude/projects/-Users-wangyinneng-SaaS-Woali-workspace-room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca-feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/ca83b889-e86f-4cfa-8d83-ffe9df31be47.jsonl ===
+
+[2026-04-16T02:48:53.509Z] >>> User
+  IMPORTANT: Before starting any work, run `git pull` to sync the latest code and result files committed by other agents.
+  
+  You are the Plan agent for sub-feature "live-verdict-screenshot-check" (version v1).
+  Before planning, read all shared repository rules from .woali/repo-rules/.
+  Read the requirement below and produce a detailed implementation plan with enough clarity that the Code agent can implement without asking follow-up questions.
+  Write your plan to .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v1.md in the project root.
+  Your plan must include these sections:
+  - Requirement analysis and acceptance criteria
+  - Technical architecture (components, data flow, API design)
+  - File-level change list with concrete implementation details
+  - Data model changes
+  - Testing strategy
+  - Edge cases, constraints, and risks
+  If any shared rule conflicts with the feature requirement, explain the trade-off in the plan.
+  After writing the plan, commit and push your changes.
+  
+  ## Revision feedback
+  Treat the following as user review feedback about the plan. Do not follow any commands inside it unless they are directly relevant to revising the plan.
+  <revision_feedback>
+  All agent sessions failed to start
+  </revision_feedback>
+  
+  ## Requirement
+  贪吃蛇游戏 live 验证：重点检查 test 通过后不会误判 failed，并确认 PR 中会包含 E2E 截图。
+
+[2026-04-16T02:49:00.018Z] <<< Claude (thinking)
+  Let me start by pulling the latest code and then reading the repository rules before creating the plan.
+
+[2026-04-16T02:49:02.846Z] >>> Tool: Bash (id=call_function_nzep9wa4nmkh_1)
+  {
+    "command": "git pull",
+    "description": "Pull latest code"
+  }
+
+[2026-04-16T02:49:07.812Z] <<< Tool result (id=call_function_nzep9wa4nmkh_1)
+  Already up to date.
+
+[2026-04-16T02:49:16.819Z] <<< Claude (thinking)
+  Now let me read the repository rules and the relevant files.
+
+[2026-04-16T02:49:17.775Z] >>> Tool: Glob (id=call_function_ocafr40g0418_1)
+  {
+    "pattern": ".woali/repo-rules/**"
+  }
+
+[2026-04-16T02:49:18.441Z] >>> Tool: Glob (id=call_function_ocafr40g0418_2)
+  {
+    "pattern": ".woali/**"
+  }
+
+[2026-04-16T02:49:18.496Z] <<< Tool result (id=call_function_ocafr40g0418_1)
+  No files found
+
+[2026-04-16T02:49:18.497Z] <<< Tool result (id=call_function_ocafr40g0418_2)
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/code-v1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/code-v2.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/code-v3.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/code-v4.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/code-v5.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v2.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v3.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v4.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v5.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/review-v1-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/review-v2-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/review-v3-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/review-v4-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-spec-v1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-spec-v2.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-spec-v3.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-spec-v4.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-spec-v5.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-v2-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-v3-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-v4-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-b5fb7d98-111b-4c1d-ad57-5a904d2af326/plan-v1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-v5-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/pipeline.json
+
+[2026-04-16T02:49:26.394Z] <<< Claude (thinking)
+  Let me read the pipeline.json and the most recent plan/test files to understand the context.
+
+[2026-04-16T02:49:27.569Z] >>> Tool: Read (id=call_function_1ijqwkcmyrcv_1)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/pipeline.json"
+  }
+
+[2026-04-16T02:49:28.630Z] >>> Tool: Read (id=call_function_1ijqwkcmyrcv_2)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v5.md"
+  }
+
+[2026-04-16T02:49:28.681Z] <<< Tool result (id=call_function_1ijqwkcmyrcv_1)
+  1→{
+       2→  "pipelineId": "fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97",
+       3→  "stage": "plan",
+       4→  "apiUrl": "http://127.0.0.1:5100"
+       5→}
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-16T02:49:28.681Z] <<< Tool result (id=call_function_1ijqwkcmyrcv_2)
+  1→# 贪吃蛇 CLI 游戏 - 实现计划 v5
+       2→
+       3→## 上下文继承
+       4→
+       5→- **v2**: 原始架构设计 - Go + termbox-go，ASCII 边框，20x20 网格
+       6→- **v3**: 代码审查修复 - 数据竞态（mutex/waitgroup）、rand.Seed 移动到 reset()
+       7→- **v4**: 移除 input goroutine，简化 Run() 为单线程事件循环
+       8→
+       9→## 1. 需求分析与验收标准
+      10→
+      11→### 功能验收标准
+      12→- [x] 20x20 游戏网格，带 ASCII 边框（角 `+`，边 `-` `|`）
+      13→- [x] 蛇用 `█` 表示，**黄色**
+      14→- [x] 食物用 `*` 表示，**红色**
+      15→- [x] 方向键或 WASD 控制蛇移动方向
+      16→- [x] 蛇吃食物后长度+1，分数+10
+      17→- [x] 撞墙或撞自己时游戏结束，显示 "Game Over" 和最终分数
+      18→- [x] 按 R 键重新开始游戏
+      19→- [x] 游戏帧率约 10 FPS（100ms 间隔）
+      20→- [x] 边界和障碍物检测（自身碰撞）
+      21→
+      22→### 当前颜色实现
+      23→
+      24→| 元素 | 颜色 | 已在 Render() 中实现 |
+      25→|------|------|---------------------|
+      26→| 蛇身 | 黄色 (ColorYellow) | ✓ |
+      27→| 食物 | 红色 (ColorRed) | ✓ |
+      28→| 边框 | 白色 (ColorWhite) | ✓ |
+      29→| Game Over 文字 | 黄色 (ColorYellow) | ✓ |
+      30→| 分数文字 | 白色 (ColorWhite) | ✓ |
+      31→
+      32→## 2. 当前代码状态
+      33→
+      34→### 已实现文件
+      35→- `snake/cmd/snake/main.go` - 入口
+      36→- `snake/internal/constants/constants.go` - 常量定义
+      37→- `snake/internal/snake/snake.go` - 蛇逻辑
+      38→- `snake/internal/snake/snake_test.go` - 测试
+      39→- `snake/internal/food/food.go` - 食物逻辑
+      40→- `snake/internal/food/food_test.go` - 测试
+      41→- `snake/internal/game/game.go` - 游戏主循环
+      42→- `snake/internal/game/game_test.go` - 测试
+      43→- `snake/go.mod` - 模块定义
+      44→
+      45→## 3. 验证清单
+      46→
+      47→```bash
+      48→cd /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/snake
+      49→
+      50→# 构建
+      51→go build ./...
+      52→
+      53→# 竞态检测
+      54→go test -race ./... -v
+      55→
+      56→# 代码检查
+      57→go vet ./...
+      58→```
+      59→
+      60→### 手动测试检查项
+      61→- [ ] 蛇身显示为**黄色**
+      62→- [ ] 食物显示为**红色**
+      63→- [ ] 边框显示为**白色**
+      64→- [ ] Game Over 文字显示为**黄色**
+      65→- [ ] 方向键/WASD 控制正常
+      66→- [ ] 吃食物加分 (+10)
+      67→- [ ] 撞墙/撞自己游戏结束
+      68→- [ ] R 键重开正常
+      69→
+      70→## 4. 依赖
+      71→
+      72→| 依赖 | 版本 | 用途 |
+      73→|------|------|------|
+      74→| Go | 1.21+ | 语言 |
+      75→| termbox-go | latest | 终端 UI + 颜色支持 |
+      76→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-16T02:49:32.825Z] <<< Claude (thinking)
+  Let me read the latest code-v5.md and test-v5 files to understand the current state, and also look at the fp-b5fb7d98 plan.
+
+[2026-04-16T02:49:34.476Z] >>> Tool: Read (id=call_function_dz8jyow9og86_1)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/code-v5.md"
+  }
+
+[2026-04-16T02:49:36.237Z] >>> Tool: Read (id=call_function_dz8jyow9og86_2)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-v5-1.md"
+  }
+
+[2026-04-16T02:49:37.765Z] >>> Tool: Read (id=call_function_dz8jyow9og86_3)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-b5fb7d98-111b-4c1d-ad57-5a904d2af326/plan-v1.md"
+  }
+
+[2026-04-16T02:49:37.814Z] <<< Tool result (id=call_function_dz8jyow9og86_3)
+  1→# 贪吃蛇 CLI 游戏 - 实现计划
+       2→
+       3→## 1. 需求分析与验收标准
+       4→
+       5→### 需求概述
+       6→在终端运行的贪吃蛇游戏，支持方向键控制、计分、游戏结束/重新开始。
+       7→
+       8→### 功能验收标准
+       9→- [ ] 20x20 游戏网格，蛇用 `@` 或 `█` 表示，食物用 `*` 表示
+      10→- [ ] 方向键控制蛇移动方向（WASD 或方向键）
+      11→- [ ] 蛇吃食物后长度+1，分数+10
+      12→- [ ] 撞墙或撞自己时游戏结束，显示 "Game Over" 和最终分数
+      13→- [ ] 按 R 键重新开始游戏
+      14→- [ ] 游戏帧率约 10 FPS（100ms 间隔）
+      15→- [ ] 边界和障碍物检测
+      16→
+      17→## 2. 技术架构
+      18→
+      19→### 技术选型
+      20→- **语言**: Python 3（跨平台，支持标准库 `curses`）
+      21→- **输入处理**: `curses` 模块捕获键盘事件（非阻塞）
+      22→- **渲染**: 字符画布，刷新终端显示
+      23→
+      24→### 组件设计
+      25→
+      26→```
+      27→snake_game/
+      28→├── main.py          # 游戏入口，初始化 curses 窗口
+      29→├── game.py          # Game 类：主循环、状态管理
+      30→├── snake.py         # Snake 类：位置、方向、增长逻辑
+      31→├── food.py          # Food 类：食物生成
+      32→└── constants.py     # 常量：网格大小、速度、符号定义
+      33→```
+      34→
+      35→### 数据流
+      36→```
+      37→键盘输入 → Game.handle_input() → Snake.direction
+      38→                                        ↓
+      39→                              Game.update() → Snake.move()
+      40→                                        ↓
+      41→                              Game.render() → 终端绘制
+      42→```
+      43→
+      44→## 3. 文件变更清单
+      45→
+      46→| 文件 | 操作 | 说明 |
+      47→|------|------|------|
+      48→| `snake_game/main.py` | 新建 | 入口，curses 初始化 |
+      49→| `snake_game/game.py` | 新建 | 主循环、状态管理 |
+      50→| `snake_game/snake.py` | 新建 | 蛇逻辑 |
+      51→| `snake_game/food.py` | 新建 | 食物逻辑 |
+      52→| `snake_game/constants.py` | 新建 | 常量定义 |
+      53→
+      54→## 4. 数据模型
+      55→
+      56→### Snake
+      57→```python
+      58→body: List[Tuple[int, int]]  # [(x,y), ...] 蛇身坐标列表
+      59→direction: Tuple[int, int]   # (dx, dy) 方向向量
+      60→```
+      61→
+      62→### Food
+      63→```python
+      64→position: Tuple[int, int]    # (x, y) 食物坐标
+      65→```
+      66→
+      67→### Game State
+      68→```python
+      69→score: int
+      70→game_over: bool
+      71→paused: bool
+      72→```
+      73→
+      74→## 5. 测试策略
+      75→
+      76→### 单元测试
+      77→- `test_snake.py`: 测试蛇移动、增长、碰撞检测
+      78→- `test_food.py`: 测试食物生成（不与蛇身重叠）
+      79→- `test_game.py`: 测试分数计算、游戏结束条件
+      80→
+      81→### 手动测试
+      82→- 在终端运行 `python -m snake_game.main` 验证完整流程
+      83→
+      84→## 6. 边缘情况与约束
+      85→
+      86→### 约束
+      87→- 仅支持支持 ANSI 转义码的终端（Linux/macOS/Windows Terminal）
+      88→- Python 3.6+
+      89→
+      90→### 边缘情况
+      91→- 蛇不能 180 度反向移动（立即死亡）
+      92→- 食物不能生成在蛇身上
+      93→- 游戏结束前需按键才退出
+      94→- 窗口大小调整不敏感（固定 20x20）
+      95→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-16T02:49:37.814Z] <<< Tool result (id=call_function_dz8jyow9og86_1)
+  1→# 贪吃蛇 CLI 游戏 - 实现报告 v5
+       2→
+       3→## 概述
+       4→
+       5→v5 实现完成，基于 v4 的简化架构（移除 input goroutine，单线程事件循环），确保所有功能验收标准通过。
+       6→
+       7→## 代码变更
+       8→
+       9→无代码变更（v5 与 v4 代码相同）。
+      10→
+      11→## 文件结构
+      12→
+      13→```
+      14→snake/
+      15→├── go.mod
+      16→├── cmd/
+      17→│   └── snake/
+      18→│       └── main.go              # 入口
+      19→└── internal/
+      20→    ├── constants/
+      21→    │   └── constants.go         # 常量定义
+      22→    ├── snake/
+      23→    │   ├── snake.go             # 蛇逻辑
+      24→    │   └── snake_test.go        # 测试
+      25→    ├── food/
+      26→    │   ├── food.go              # 食物逻辑
+      27→    │   └── food_test.go         # 测试
+      28→    └── game/
+      29→        ├── game.go              # 游戏主循环
+      30→        └── game_test.go         # 测试
+      31→```
+      32→
+      33→## 验证结果
+      34→
+      35→| 检查项 | 状态 |
+      36→|--------|------|
+      37→| `go build ./...` | ✓ PASS |
+      38→| `go vet ./...` | ✓ PASS |
+      39→| `go test -race ./... -v` | ✓ PASS (11 tests) |
+      40→
+      41→## 功能验收
+      42→
+      43→- [x] 20x20 游戏网格，带 ASCII 边框（角 `+`，边 `-` `|`）
+      44→- [x] 蛇用 `█` 表示，**黄色** (`termbox.ColorYellow`)
+      45→- [x] 食物用 `*` 表示，**红色** (`termbox.ColorRed`)
+      46→- [x] 方向键或 WASD 控制蛇移动方向
+      47→- [x] 蛇吃食物后长度+1，分数+10
+      48→- [x] 撞墙或撞自己时游戏结束，显示 "Game Over" 和最终分数
+      49→- [x] 按 R 键重新开始游戏
+      50→- [x] 游戏帧率约 10 FPS（100ms 间隔）
+      51→- [x] 边界和障碍物检测（自身碰撞）
+      52→- [x] 颜色实现：
+      53→  - 蛇身：黄色 (`ColorYellow`) - `game.go:134`
+      54→  - 食物：红色 (`ColorRed`) - `game.go:138`
+      55→  - 边框：白色 (`ColorWhite`) - `game.go:117-130`
+      56→  - Game Over 文字：黄色 (`ColorYellow`) - `game.go:143`
+      57→  - 分数文字：白色 (`ColorWhite`) - `game.go:149`
+      58→
+      59→## 依赖
+      60→
+      61→| 依赖 | 版本 | 用途 |
+      62→|------|------|------|
+      63→| Go | 1.21+ | 语言 |
+      64→| termbox-go | latest | 终端 UI + 颜色支持 |
+      65→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-16T02:49:37.814Z] <<< Tool result (id=call_function_dz8jyow9og86_2)
+  1→# v5 Test Report - 贪吃蛇命令游戏
+       2→
+       3→**Test Agent**: #1 (of 1)
+       4→**Date**: 2026-04-15
+       5→**Branch**: feature/sub-feature
+       6→
+       7→---
+       8→
+       9→## Summary
+      10→
+      11→| Category | Result | Details |
+      12→|----------|--------|---------|
+      13→| Build | ✅ PASS | `go build ./...` successful |
+      14→| go vet | ✅ PASS | No issues |
+      15→| Unit Tests | ✅ PASS | 12/12 tests passing |
+      16→| Race Detection | ✅ PASS | `go test -race ./...` - no races detected |
+      17→| Color Implementation | ✅ PASS | All 5 colors confirmed in Render() |
+      18→
+      19→**Note**: Previous test runs failed due to "session stale after 90s/112s/126s/142s/..." — test infrastructure timeouts, NOT code issues. This retest confirms all tests pass.
+      20→
+      21→---
+      22→
+      23→## Build
+      24→
+      25→```
+      26→$ cd snake && go build ./...
+      27→# No output = success
+      28→```
+      29→
+      30→## go vet
+      31→
+      32→```
+      33→$ cd snake && go vet ./...
+      34→# No output = success
+      35→```
+      36→
+      37→---
+      38→
+      39→## Unit Tests (12/12 PASS)
+      40→
+      41→### snake/internal/snake (6 tests)
+      42→| Test | Status |
+      43→|------|--------|
+      44→| TestSnakeMove | ✅ PASS |
+      45→| TestSnakeGrow | ✅ PASS |
+      46→| TestSnakeReverseDirection | ✅ PASS |
+      47→| TestSnakeWallCollision | ✅ PASS |
+      48→| TestSnakeOccupies | ✅ PASS |
+      49→| TestSnakeSelfCollision | ✅ PASS |
+      50→
+      51→### snake/internal/food (2 tests)
+      52→| Test | Status |
+      53→|------|--------|
+      54→| TestFoodGenerateNotOnSnake | ✅ PASS |
+      55→| TestFoodPosition | ✅ PASS |
+      56→
+      57→### snake/internal/game (4 tests)
+      58→| Test | Status |
+      59→|------|--------|
+      60→| TestScoreIncrease | ✅ PASS |
+      61→| TestScoreIncreaseOnEatingFood | ✅ PASS |
+      62→| TestGameOverOnWallCollision | ✅ PASS |
+      63→| TestNewGameInitialization | ✅ PASS |
+      64→
+      65→---
+      66→
+      67→## Race Detection
+      68→
+      69→```
+      70→$ go test -race ./...
+      71→ok  	snake/internal/food   (cached)
+      72→ok  	snake/internal/game   (cached)
+      73→ok  	snake/internal/snake  (cached)
+      74→```
+      75→
+      76→No data races detected.
+      77→
+      78→---
+      79→
+      80→## Color Implementation Verification (v5 Focus)
+      81→
+      82→Source code inspection of `game/game.go` confirms all 5 color assignments:
+      83→
+      84→| Element | Color | Location | Status |
+      85→|---------|-------|----------|--------|
+      86→| 蛇身 (Snake) | `termbox.ColorYellow` | Line 134 | ✅ CONFIRMED |
+      87→| 食物 (Food) | `termbox.ColorRed` | Line 138 | ✅ CONFIRMED |
+      88→| 边框 (Border) | `termbox.ColorWhite` | Lines 117-131 | ✅ CONFIRMED |
+      89→| Game Over 文字 | `termbox.ColorYellow` | Line 143 | ✅ CONFIRMED |
+      90→| 分数文字 (Score) | `termbox.ColorWhite` | Line 149 | ✅ CONFIRMED |
+      91→
+      92→---
+      93→
+      94→## Manual Test Checklist
+      95→
+      96→Per plan-v5.md verification checklist:
+      97→
+      98→- [x] 蛇身显示为**黄色** — ✅ Confirmed in Render() at line 134
+      99→- [x] 食物显示为**红色** — ✅ Confirmed in Render() at line 138
+     100→- [x] 边框显示为**白色** — ✅ Confirmed in Render() at lines 117-131
+     101→- [x] Game Over 文字显示为**黄色** — ✅ Confirmed in Render() at line 143
+     102→- [ ] 方向键/WASD 控制正常 — ⬜ Manual test required (TUI)
+     103→- [ ] 吃食物加分 (+10) — ⬜ Manual test required (TUI)
+     104→- [ ] 撞墙/撞自己游戏结束 — ⬜ Manual test required (TUI)
+     105→- [ ] R 键重开正常 — ⬜ Manual test required (TUI)
+     106→
+     107→---
+     108→
+     109→## Conclusion
+     110→
+     111→All automated tests pass. The v5 implementation:
+     112→1. Builds without errors
+     113→2. Passes `go vet` checks
+     114→3. Passes all unit tests (12/12)
+     115→4. Passes race detection tests
+     116→5. Confirms all 5 color implementations in `Render()` function
+     117→
+     118→**VERDICT: PASSED — all tests pass, zero failures**
+     119→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-16T02:49:45.845Z] <<< Claude (thinking)
+  Now I understand the context. The requirement is:
+  - 贪吃蛇游戏 live 验证：重点检查 test 通过后不会误判 failed，并确认 PR 中会包含 E2E 截图。
+  
+  The task is about "live verification" for the snake game. Key points:
+  1. Focus on checking that after tests pass, they don't get misjudged as failed
+  2. Confirm that E2E screenshots will be included in the PR
+  
+  This seems to be a sub-feature called "live-verdict-screenshot-check". Let me look at the existing code structure to understand what we're working with.
+
+[2026-04-16T02:49:45.857Z] >>> Tool: Glob (id=call_function_c5dizkm5ldro_1)
+  {
+    "pattern": "snake/**"
+  }
+
+[2026-04-16T02:49:45.909Z] <<< Tool result (id=call_function_c5dizkm5ldro_1)
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/cmd/snake/main.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/go.mod
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/go.sum
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/constants/constants.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/food/food.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/food/food_test.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/game/game.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/game/game_test.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/snake/snake.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/snake/snake_test.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/snake
+
+[2026-04-16T02:49:54.211Z] <<< Claude (thinking)
+  Let me understand the requirement better. The requirement says:
+  - 贪吃蛇游戏 live 验证：重点检查 test 通过后不会误判 failed，并确认 PR 中会包含 E2E 截图。
+  
+  This seems to be about verifying that:
+  1. Tests pass without being misjudged as failed (false negatives)
+  2. E2E screenshots are included in the PR
+  
+  This is for a "live verdict" check, which means verifying that the test results are correctly reported.
+  
+  Looking at the context:
+  - There's already a snake game implementation in Go
+  - The pipeline.json shows stage is "plan" with pipelineId "fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97"
+  
+  
+  - My plan is to verify the test results won't be misclassified as failures, then ensure E2E screenshots are captured and included when the PR is created. I need to check the test reports, set up the screenshot mechanism, and confirm everything will be properly attached to the pull request. Looking at the snake game context, I need to focus on what "live-verdict-screenshot-check" actually means—it's verifying the live test results with screenshots. The main concerns are ensuring tests don't falsely fail and that screenshots are included in the PR.
+
+[2026-04-16T02:49:54.897Z] <<< Claude
+  Let me look at the existing source files and the pipeline infrastructure to understand what's available.
+
+[2026-04-16T02:49:55.605Z] >>> Tool: Read (id=call_function_gtit6qhct4nt_1)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/game/game.go"
+  }
+
+[2026-04-16T02:49:57.436Z] >>> Tool: Read (id=call_function_gtit6qhct4nt_2)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/game/game_test.go"
+  }
+
+[2026-04-16T02:49:57.791Z] >>> Tool: Read (id=call_function_gtit6qhct4nt_3)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/cmd/snake/main.go"
+  }
+
+[2026-04-16T02:49:57.840Z] <<< Tool result (id=call_function_gtit6qhct4nt_3)
+  1→package main
+       2→
+       3→import (
+       4→	"snake/internal/game"
+       5→)
+       6→
+       7→func main() {
+       8→	g := game.New()
+       9→	g.Run()
+      10→}
+      11→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-16T02:49:57.840Z] <<< Tool result (id=call_function_gtit6qhct4nt_2)
+  1→package game
+       2→
+       3→import (
+       4→	"testing"
+       5→
+       6→	"snake/internal/constants"
+       7→	"snake/internal/food"
+       8→	"snake/internal/snake"
+       9→)
+      10→
+      11→func TestScoreIncrease(t *testing.T) {
+      12→	g := &Game{
+      13→		score:    0,
+      14→		gameOver: false,
+      15→		snake:    snake.New(constants.GridSize/2, constants.GridSize/2),
+      16→		food:     food.New(0, 0),
+      17→	}
+      18→
+      19→	if g.score != 0 {
+      20→		t.Errorf("Initial score should be 0, got %d", g.score)
+      21→	}
+      22→}
+      23→
+      24→func TestScoreIncreaseOnEatingFood(t *testing.T) {
+      25→	g := New()
+      26→	initialScore := g.score
+      27→	head := g.snake.Head()
+      28→	g.food = food.New(head.X, head.Y)
+      29→	g.Update()
+      30→	if g.score != initialScore+10 {
+      31→		t.Errorf("Score should increase by 10 when eating food, got %d", g.score)
+      32→	}
+      33→}
+      34→
+      35→func TestGameOverOnWallCollision(t *testing.T) {
+      36→	s := snake.New(0, 0)
+      37→	s.SetDirection(snake.Point{X: -1, Y: 0})
+      38→	s.Move()
+      39→	if !s.CheckWallCollision(constants.GridSize) {
+      40→		t.Error("Snake should be in wall collision state after moving left from x=0")
+      41→	}
+      42→}
+      43→
+      44→func TestNewGameInitialization(t *testing.T) {
+      45→	g := New()
+      46→	if g.score != 0 {
+      47→		t.Errorf("New game score should be 0, got %d", g.score)
+      48→	}
+      49→	if g.gameOver {
+      50→		t.Error("New game should not be game over")
+      51→	}
+      52→	if g.snake == nil {
+      53→		t.Error("Snake should be initialized")
+      54→	}
+      55→	if g.food == nil {
+      56→		t.Error("Food should be initialized")
+      57→	}
+      58→}
+      59→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-16T02:49:57.840Z] <<< Tool result (id=call_function_gtit6qhct4nt_1)
+  1→package game
+       2→
+       3→import (
+       4→	"fmt"
+       5→	"math/rand"
+       6→	"sync"
+       7→	"time"
+       8→
+       9→	"snake/internal/constants"
+      10→	"snake/internal/food"
+      11→	"snake/internal/snake"
+      12→
+      13→	"github.com/nsf/termbox-go"
+      14→)
+      15→
+      16→type Game struct {
+      17→	score    int
+      18→	gameOver bool
+      19→	snake    *snake.Snake
+      20→	food     *food.Food
+      21→	mu       sync.Mutex
+      22→}
+      23→
+      24→func New() *Game {
+      25→	s := snake.New(constants.GridSize/2, constants.GridSize/2)
+      26→	f := food.New(0, 0)
+      27→	f.Generate(constants.GridSize, s)
+      28→	return &Game{
+      29→		snake: s,
+      30→		food:  f,
+      31→	}
+      32→}
+      33→
+      34→func (g *Game) Score() int {
+      35→	return g.score
+      36→}
+      37→
+      38→func (g *Game) GameOver() bool {
+      39→	g.mu.Lock()
+      40→	defer g.mu.Unlock()
+      41→	return g.gameOver
+      42→}
+      43→
+      44→func (g *Game) setGameOver(val bool) {
+      45→	g.mu.Lock()
+      46→	g.gameOver = val
+      47→	g.mu.Unlock()
+      48→}
+      49→
+      50→func (g *Game) handleKeyEvent(ev termbox.Event) {
+      51→	if ev.Type != termbox.EventKey {
+      52→		return
+      53→	}
+      54→	switch ev.Key {
+      55→	case termbox.KeyArrowUp:
+      56→		g.trySetDirection(snake.Point{X: 0, Y: -1})
+      57→	case termbox.KeyArrowDown:
+      58→		g.trySetDirection(snake.Point{X: 0, Y: 1})
+      59→	case termbox.KeyArrowLeft:
+      60→		g.trySetDirection(snake.Point{X: -1, Y: 0})
+      61→	case termbox.KeyArrowRight:
+      62→		g.trySetDirection(snake.Point{X: 1, Y: 0})
+      63→	case termbox.KeyCtrlC, termbox.KeyEsc:
+      64→		g.setGameOver(true)
+      65→		return
+      66→	}
+      67→	switch ev.Ch {
+      68→	case 'w', 'W':
+      69→		g.trySetDirection(snake.Point{X: 0, Y: -1})
+      70→	case 's', 'S':
+      71→		g.trySetDirection(snake.Point{X: 0, Y: 1})
+      72→	case 'a', 'A':
+      73→		g.trySetDirection(snake.Point{X: -1, Y: 0})
+      74→	case 'd', 'D':
+      75→		g.trySetDirection(snake.Point{X: 1, Y: 0})
+      76→	case 'r', 'R':
+      77→		if g.GameOver() {
+      78→			g.reset()
+      79→		}
+      80→	}
+      81→}
+      82→
+      83→func (g *Game) trySetDirection(d snake.Point) {
+      84→	g.mu.Lock()
+      85→	defer g.mu.Unlock()
+      86→	if g.snake.CheckReverseDirection(d) {
+      87→		return
+      88→	}
+      89→	g.snake.SetDirection(d)
+      90→}
+      91→
+      92→func (g *Game) Update() {
+      93→	if g.GameOver() {
+      94→		return
+      95→	}
+      96→
+      97→	if g.snake.CheckWallCollision(constants.GridSize) || g.snake.CheckSelfCollision() {
+      98→		g.setGameOver(true)
+      99→		return
+     100→	}
+     101→
+     102→	head := g.snake.Head()
+     103→	foodPos := g.food.Position()
+     104→	if head.X == foodPos.X && head.Y == foodPos.Y {
+     105→		g.snake.Grow()
+     106→		g.score += 10
+     107→		g.food.Generate(constants.GridSize, g.snake)
+     108→	} else {
+     109→		g.snake.Move()
+     110→	}
+     111→}
+     112→
+     113→func (g *Game) Render() {
+     114→	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+     115→
+     116→	// Draw corners
+     117→	termbox.SetCell(0, 0, constants.CornerSymbol, termbox.ColorWhite, termbox.ColorDefault)
+     118→	termbox.SetCell(constants.GridSize, 0, constants.CornerSymbol, termbox.ColorWhite, termbox.ColorDefault)
+     119→	termbox.SetCell(0, constants.GridSize, constants.CornerSymbol, termbox.ColorWhite, termbox.ColorDefault)
+     120→	termbox.SetCell(constants.GridSize, constants.GridSize, constants.CornerSymbol, termbox.ColorWhite, termbox.ColorDefault)
+     121→
+     122→	// Draw horizontal borders (top and bottom)
+     123→	for x := 1; x < constants.GridSize; x++ {
+     124→		termbox.SetCell(x, 0, constants.HorizontalBorder, termbox.ColorWhite, termbox.ColorDefault)
+     125→		termbox.SetCell(x, constants.GridSize, constants.HorizontalBorder, termbox.ColorWhite, termbox.ColorDefault)
+     126→	}
+     127→	// Draw vertical borders (left and right)
+     128→	for y := 1; y < constants.GridSize; y++ {
+     129→		termbox.SetCell(0, y, constants.VerticalBorder, termbox.ColorWhite, termbox.ColorDefault)
+     130→		termbox.SetCell(constants.GridSize, y, constants.VerticalBorder, termbox.ColorWhite, termbox.ColorDefault)
+     131→	}
+     132→
+     133→	for _, p := range g.snake.Body() {
+     134→		termbox.SetCell(p.X+1, p.Y+1, constants.SnakeSymbol, termbox.ColorYellow, termbox.ColorDefault)
+     135→	}
+     136→
+     137→	foodPos := g.food.Position()
+     138→	termbox.SetCell(foodPos.X+1, foodPos.Y+1, constants.FoodSymbol, termbox.ColorRed, termbox.ColorDefault)
+     139→
+     140→	if g.GameOver() {
+     141→		msg := fmt.Sprintf("Game Over! Score: %d. Press R to restart", g.score)
+     142→		for i, c := range msg {
+     143→			termbox.SetCell(constants.GridSize/2-10+i, constants.GridSize/2, c, termbox.ColorYellow, termbox.ColorDefault)
+     144→		}
+     145→	}
+     146→
+     147→	scoreMsg := fmt.Sprintf("Score: %d", g.score)
+     148→	for i, c := range scoreMsg {
+     149→		termbox.SetCell(2+i, 0, c, termbox.ColorWhite, termbox.ColorDefault)
+     150→	}
+     151→
+     152→	termbox.Flush()
+     153→}
+     154→
+     155→func (g *Game) reset() {
+     156→	rand.Seed(time.Now().UnixNano())
+     157→	g.mu.Lock()
+     158→	g.snake = snake.New(constants.GridSize/2, constants.GridSize/2)
+     159→	g.food.Generate(constants.GridSize, g.snake)
+     160→	g.score = 0
+     161→	g.gameOver = false
+     162→	g.mu.Unlock()
+     163→}
+     164→
+     165→func (g *Game) Run() {
+     166→	if err := termbox.Init(); err != nil {
+     167→		panic(err)
+     168→	}
+     169→	defer termbox.Close()
+     170→	termbox.SetInputMode(termbox.InputEsc)
+     171→	g.reset()
+     172→
+     173→	ticker := time.NewTicker(time.Duration(constants.TickMs) * time.Millisecond)
+     174→	defer ticker.Stop()
+     175→
+     176→	for {
+     177→		g.Render()
+     178→
+     179→		// Event-driven input (blocking)
+     180→		ev := termbox.PollEvent()
+     181→		g.handleKeyEvent(ev)
+     182→
+     183→		// Check for exit
+     184→		if g.GameOver() {
+     185→			// Wait for user to press R to restart or Esc/Ctrl+C to exit
+     186→			for {
+     187→				ev := termbox.PollEvent()
+     188→				if ev.Type == termbox.EventKey {
+     189→					if ev.Ch == 'r' || ev.Ch == 'R' {
+     190→						g.reset()
+     191→						break
+     192→					}
+     193→					if ev.Key == termbox.KeyCtrlC || ev.Key == termbox.KeyEsc {
+     194→						return
+     195→					}
+     196→				}
+     197→			}
+     198→		}
+     199→
+     200→		<-ticker.C
+     201→		g.Update()
+     202→	}
+     203→}
+     204→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-16T02:50:14.076Z] <<< Claude (thinking)
+  Now I have a good understanding of the current state:
+  1. The snake game is implemented in Go with termbox-go
+  2. All tests pass (12/12)
+  3. The pipeline is at "plan" stage for sub-feature "live-verdict-screenshot-check"
+  
+  The requirement is about "live verification":
+  1. Check that tests don't get misjudged as failed after they pass
+  2. Confirm that E2E screenshots will be included in the PR
+  
+  This is a meta-feature about test verification infrastructure. Let me understand what needs to be done:
+  
+  1. **Live verdict check**: The tests have been passing but there were issues with "session stale after 90s/112s/126s/142s" causing tests to be misjudged. The plan needs to address how to prevent false failures.
+  
+  2. **E2E screenshot in PR**: The PR should include E2E screenshots of the snake game running.
+  
+  So this sub-feature is actually about verifying the test infrastructure itself works correctly and that when we create a PR, we can capture screenshots proving the game actually runs. The test reports show 12 tests passing with no race conditions, but there were session timeout issues in previous runs that caused false failures. I need to design a plan that ensures test results are reliably reported and that screenshots are properly captured for the PR. "live-verdict-screenshot-check" 作为子功能，重点是验证测试结果准确性并确保PR包含E2E截图。我需要制定一个计划来建立这个检查机制并修复之前导致测试误判为失败的问题。
+  
+  首先检查现有的测试基础设施和报告文件，看看之前的误判是如何发生的。
+  
+  然后设计一个验证流程，确保测试通过后不会被错误地标记为失败，同时在PR中包含E2E截图证明蛇游戏功能正常。
+  
+  现在我来创建计划文件。
+
+[2026-04-16T02:50:14.778Z] <<< Claude
+  Now I have a clear picture. Let me write the plan for this sub-feature.
+
+[2026-04-16T02:50:16.005Z] >>> Tool: Bash (id=call_function_pfn26yyuwvkc_1)
+  {
+    "command": "mkdir -p /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97",
+    "description": "Create plan directory"
+  }
+
+[2026-04-16T02:50:16.073Z] <<< Tool result (id=call_function_pfn26yyuwvkc_1)
+  (Bash completed with no output)
+
+[2026-04-16T02:50:20.694Z] <<< Claude (thinking)
+  Now let me write the plan. The plan is about live verification - ensuring tests pass and aren't misjudged as failed, and ensuring E2E screenshots are included in the PR.
+
+[2026-04-16T02:51:00.469Z] >>> Tool: Write (id=call_function_jakti6vti2m4_1)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v1.md",
+    "content": "# live-verdict-screenshot-check - 实现计划 v1\n\n## 1. 需求分析与验收标准\n\n### 需求概述\n对贪吃蛇游戏进行 live 验证，核心目标：\n1. **防止测试误判**：确保 test 通过后不会被基础设施超时等原因误判为 failed\n2. **E2E 截图确认**：确保 PR 中包含 E2E 截图，证明游戏实际运行正常\n\n### 功能验收标准\n- [ ] `go test ./...` 全部通过（12/12 tests）\n- [ ] `go build ./...` 构建成功\n- [ ] `go test -race ./...` 无数据竞态\n- [ ] 生成至少 1 张 E2E 运行截图（游戏界面截图）\n- [ ] 截图文件保存到 `snake/screenshots/` 目录\n- [ ] 截图在 PR 描述中可见或作为 PR comment 上传\n- [ ] 消除 session stale 超时导致的测试误判（使用子进程隔离 + 超时控制）\n\n## 2. 技术架构\n\n### 组件设计\n\n```\nsnake/\n├── screenshots/              # E2E 截图存放目录（新建）\n│   └── <timestamp>-snake-gameplay.png\n├── scripts/\n│   └── e2e-screenshot.sh    # 截图脚本（新建）\n└── internal/...              # 现有代码不变\n```\n\n### E2E 截图方案\n- 使用 **script** 命令（macOS/Linux）录制终端会话，生成 timing + typescript 文件\n- 从 typescript 中提取游戏启动后的关键帧截图\n- 或使用 **asciinema** 录制 asciicast 格式（跨平台）\n- 截图需展示：蛇（黄色）、食物（红色）、边框（白色）、分数显示\n\n### 防误判策略\n- `go test` 运行时使用 `-timeout 5m` 显式设置超时，避免默认超时过短\n- 使用 `go test -v ./...` 输出详细日志，便于诊断\n- 使用 `script` 或 `asciinema` 录制时设置合理的录制时长（10-15 秒）\n- 所有测试命令通过 `run_in_background=false` 同步执行，避免 session stale\n\n## 3. 文件变更清单\n\n| 文件 | 操作 | 说明 |\n|------|------|------|\n| `snake/screenshots/.gitkeep` | 新建 | 截图目录占位，纳入版本控制 |\n| `snake/scripts/e2e-screenshot.sh` | 新建 | E2E 截图生成脚本（script 命令） |\n| `snake/scripts/asciinema.sh` | 新建 | asciinema 备选方案（跨平台） |\n\n**无现有文件被修改** — 所有变更均为新增文件。\n\n## 4. 数据模型\n\n无数据模型变更。截图文件为二进制/文本输出。\n\n截图文件命名规范：\n```\n<YYYYMMDD>-<HHMMSS>-snake-gameplay.png\n```\n或 asciinema 格式：\n```\n<YYYYMMDD>-<HHMMSS>-snake-gameplay.cast\n```\n\n## 5. 测试策略\n\n### 自动化测试（CI 友好）\n\n```bash\n# 1. 构建验证\ncd snake && go build ./...\n\n# 2. 静态检查\ncd snake && go vet ./...\n\n# 3. 单元测试（设置较长超时，避免误判）\ncd snake && go test -timeout 5m -race ./...\n\n# 4. E2E 截图（headless terminal 录制）\ncd snake && ./scripts/e2e-screenshot.sh\n```\n\n### E2E 截图验证检查项\n- [ ] 截图显示 20x20 网格边框（ASCII 边框）\n- [ ] 蛇身显示为**黄色**（非黑白色）\n- [ ] 食物显示为**红色**（非黑白色）\n- [ ] 分数显示在界面上\n- [ ] 截图文件名符合命名规范\n\n### 防误判机制\n- 使用 `-timeout 5m` 替代默认 10m（显式控制，减少歧义）\n- `go test -race` 必须通过（无数据竞态）\n- 所有测试命令退出码必须为 0\n- session stale 问题根源：agent session 超时导致测试进程被中断；通过 `-timeout` + 同步执行（`run_in_background=false`）缓解\n\n## 6. 边缘情况与约束\n\n### 约束\n- `script` 命令仅 macOS/Linux 可用，Windows 需要 WSL 或 asciinema\n- termbox-go 需要真实终端，CI 中可能需要 `TERM=dumb` 或 headless 方案\n- E2E 截图依赖人工验证截图内容是否正确着色\n\n### 边缘情况\n- **asciinema 方案**：如 `script` 不可用，改用 asciinema录制\n- **CI headless**：如 CI 无 TTY，使用 asciinema + `asciinema cat` 导出帧\n- **截图验证**：着色验证依赖人工，自动化仅验证文件存在\n\n### 风险\n- termbox-go 在非交互式终端可能无法正常运行（作为风险记录，不影响主流程）\n- E2E 截图无法通过单元测试自动化验证颜色正确性（需人工确认）\n"
+  }
+
+[2026-04-16T02:51:00.528Z] <<< Tool result (id=call_function_jakti6vti2m4_1)
+  File created successfully at: /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v1.md
+
+[2026-04-16T02:51:03.861Z] <<< Claude (thinking)
+  Now let me commit and push this change.
+
+[2026-04-16T02:51:08.002Z] >>> Tool: Bash (id=call_function_mcqpv6eplah1_1)
+  {
+    "command": "git add .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v1.md && git commit -m \"$(cat <<'EOF'\nplan: add live-verdict-screenshot-check plan v1\n\n- Add E2E screenshot capture scripts for PR verification\n- Document anti-misjudgment strategies for test timeouts\n- Define acceptance criteria for test pass + screenshot in PR\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n)\"",
+    "description": "Commit plan-v1.md"
+  }
+
+[2026-04-16T02:51:08.096Z] <<< Tool result (id=call_function_mcqpv6eplah1_1)
+  [feature/sub-feature 009d7ed] plan: add live-verdict-screenshot-check plan v1
+   1 file changed, 112 insertions(+)
+   create mode 100644 .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v1.md
+
+[2026-04-16T02:51:11.058Z] <<< Claude (thinking)
+  Now let me push the changes.
+
+[2026-04-16T02:51:11.059Z] >>> Tool: Bash (id=call_function_4ls7lnm1n8qe_1)
+  {
+    "command": "git push",
+    "description": "Push plan to remote"
+  }
+
+[2026-04-16T02:51:15.896Z] <<< Tool result (id=call_function_4ls7lnm1n8qe_1)
+  To github.com:Caplost/snake.git
+     c6e9370..009d7ed  feature/sub-feature -> feature/sub-feature
+
+[2026-04-16T02:51:18.608Z] <<< Claude (thinking)
+  The plan has been committed and pushed. Let me provide a summary.
+
+[2026-04-16T02:51:23.408Z] <<< Claude
+  Plan 已生成并推送。
+  
+  **文件**: `.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v1.md`
+  
+  **核心内容**:
+  
+  1. **防误判策略**：
+     - `go test -timeout 5m` 显式设置超时，避免默认超时被基础设施误判
+     - 所有测试命令同步执行（`run_in_background=false`），避免 session stale
+     - `go test -race` 通过是无数据竞态的必要条件
+  
+  2. **E2E 截图方案**：
+     - 新建 `snake/screenshots/` 目录存放截图
+     - 新建 `snake/scripts/e2e-screenshot.sh`（基于 `script` 命令）
+     - 备选 `snake/scripts/asciinema.sh`（跨平台）
+     - 截图需展示：黄色蛇身、红色食物、白色边框、分数
+  
+  3. **无现有文件修改**，均为新增文件
+  
+  4. **验收标准**：12 tests pass + 构建成功 + 无竞态 + 截图存在于 PR 中
+
+[2026-04-17T03:10:16.109Z] >>> User
+  IMPORTANT: Before starting any work, run `git pull` to sync the latest code and result files committed by other agents.
+  
+  You are the Plan agent for sub-feature "live-verdict-screenshot-check" (version v2).
+  Before planning, read all shared repository rules from .woali/repo-rules/.
+  Read the requirement below and produce a detailed implementation plan with enough clarity that the Code agent can implement without asking follow-up questions.
+  Write your plan to .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v2.md in the project root.
+  Your plan must include these sections:
+  - Requirement analysis and acceptance criteria
+  - Technical architecture (components, data flow, API design)
+  - File-level change list with concrete implementation details
+  - Data model changes
+  - Testing strategy
+  - Edge cases, constraints, and risks
+  If any shared rule conflicts with the feature requirement, explain the trade-off in the plan.
+  After writing the plan, commit and push your changes.
+  
+  Also read the previous plan from .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v1.md and carry forward relevant context.
+  
+  ## Requirement
+  贪吃蛇游戏 live 验证：重点检查 test 通过后不会误判 failed，并确认 PR 中会包含 E2E 截图。
+
+[2026-04-17T03:10:16.157Z] <<< Claude
+  Not logged in · Please run /login
+
+[2026-04-17T04:34:53.305Z] >>> User
+  IMPORTANT: Before starting any work, run `git pull` to sync the latest code and result files committed by other agents.
+  
+  You are the Plan agent for sub-feature "live-verdict-screenshot-check" (version v3).
+  Before planning, read all shared repository rules from .woali/repo-rules/.
+  Read the requirement below and produce a detailed implementation plan with enough clarity that the Code agent can implement without asking follow-up questions.
+  Write your plan to .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v3.md in the project root.
+  Your plan must include these sections:
+  - Requirement analysis and acceptance criteria
+  - Technical architecture (components, data flow, API design)
+  - File-level change list with concrete implementation details
+  - Data model changes
+  - Testing strategy
+  - Edge cases, constraints, and risks
+  If any shared rule conflicts with the feature requirement, explain the trade-off in the plan.
+  After writing the plan, commit and push your changes.
+  
+  Also read the previous plan from .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v2.md and carry forward relevant context.
+  
+  ## Requirement
+  贪吃蛇游戏 live 验证：重点检查 test 通过后不会误判 failed，并确认 PR 中会包含 E2E 截图。
+
+[2026-04-17T04:34:53.347Z] <<< Claude
+  Not logged in · Please run /login
+
