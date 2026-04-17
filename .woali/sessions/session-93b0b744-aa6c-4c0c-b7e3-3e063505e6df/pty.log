@@ -7,4 +7,4 @@ Run self-verification before finishing: lint, type-check, and relevant tests.
 Write an implementation report to .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/code-v4.md.
 Write a complete test specification to .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/test-spec-v4.md. This file is the primary input for the Test agent.
 The test specification must include unit coverage, integration/E2E scenarios, expected results, environment/setup notes, and Playwright coverage when this repo uses Playwright.
-After coding, commit and push your changes.
+After coding, commit and push your changes.^[/exit
