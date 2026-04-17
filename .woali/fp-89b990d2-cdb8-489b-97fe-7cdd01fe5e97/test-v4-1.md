@@ -56,6 +56,7 @@ cd snake && ./scripts/e2e-screenshot.sh
   - `snake/screenshots/20260417-144153-snake-gameplay.cast` — 1128 bytes
   - `snake/screenshots/20260417-144158-snake-gameplay.cast` — 1146 bytes
 - Both files start with valid asciinema JSON header: `{"version":3,...`
+- Fresh run (Agent #1): `snake/screenshots/20260417-144259-snake-gameplay.cast` — 1129 bytes, `{` header
 
 ### 5. Screenshots Captured
 
@@ -63,6 +64,7 @@ cd snake && ./scripts/e2e-screenshot.sh
 |------|------|
 | `20260417-144153-snake-gameplay.cast` | 1128 bytes |
 | `20260417-144158-snake-gameplay.cast` | 1146 bytes |
+| `20260417-144259-snake-gameplay.cast` | 1129 bytes |
 
 Screenshots saved to `.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/screenshots-v4/`
 
