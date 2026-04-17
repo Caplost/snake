@@ -1,8 +1,8 @@
 # Test Report — live-verdict-screenshot-check (v4)
 
-## Test Results (Agent #1 - Fresh Run 2026-04-17)
+## Test Results (Agent #1 - Fresh Run 2026-04-17 14:48)
 
-**Date**: 2026-04-17
+**Date**: 2026-04-17 14:48:06
 **Platform**: macOS (Darwin 24.6.0)
 **Branch**: feature/sub-feature
 **Agent**: Test Agent #1 (of 1) — live-verdict-screenshot-check v4
@@ -52,24 +52,16 @@ cd snake && ./scripts/e2e-screenshot.sh
 
 **Result**: PASS
 - Script exited successfully (exit 0)
-- `.cast` files created:
-  - `snake/screenshots/20260417-144153-snake-gameplay.cast` — 1128 bytes
-  - `snake/screenshots/20260417-144158-snake-gameplay.cast` — 1146 bytes
-- Both files start with valid asciinema JSON header: `{"version":3,...`
-- Fresh run (Agent #1): `snake/screenshots/20260417-144631-snake-gameplay.cast` — 1116 bytes, asciinema v3 format with `{"version":3,...` header
+- Output: `SUCCESS: Recording saved to .../snake/screenshots/20260417-144806-snake-gameplay.cast (1146 bytes, asciinema format)`
+- `.cast` file starts with valid asciinema JSON header: `{"version":3,...`
 
 ### 5. Screenshots Captured
 
 | File | Size |
 |------|------|
-| `20260417-144153-snake-gameplay.cast` | 1128 bytes |
-| `20260417-144158-snake-gameplay.cast` | 1146 bytes |
-| `20260417-144259-snake-gameplay.cast` | 1129 bytes |
-| `20260417-144408-snake-gameplay.cast` | 1129 bytes |
-| `20260417-144631-snake-gameplay.cast` | 1116 bytes |
-| `20260417-144714-snake-gameplay.cast` | 1130 bytes |
+| `20260417-144806-snake-gameplay.cast` | 1146 bytes (fresh run) |
 
-Screenshots saved to `.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/screenshots-v4/`
+Screenshot saved to `.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/screenshots-v4/`
 
 ---
 
@@ -82,7 +74,7 @@ Screenshots saved to `.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/screenshots
 | `go test -timeout 5m -race ./...` | 12/12 pass | 12/12 pass | PASS |
 | `e2e-screenshot.sh` exists | Exists | Exists + executable | PASS |
 | `screenshots/` directory | Exists | Exists | PASS |
-| `.cast` file non-empty | Size > 0 | 1129 bytes | PASS |
+| `.cast` file non-empty | Size > 0 | 1146 bytes | PASS |
 | `.cast` valid asciinema format | Starts with `{` | `{"version":3,...` | PASS |
 
 ---
