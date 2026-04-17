@@ -10,34 +10,20 @@
 |-------|--------|---------|
 | `go build ./...` | ✅ PASS | Build succeeded, no errors |
 | `go vet ./...` | ✅ PASS | No warnings |
-| `go test -timeout 5m -race ./...` | ✅ PASS | 12/12 tests, 3/3 packages |
+| `go test -timeout 5m -race ./...` | ✅ PASS | 3/3 packages (all cached) |
 | E2E screenshot script | ✅ PASS | `e2e-screenshot.sh` exits 0, produces valid .cast |
-| `.cast` file generated | ✅ PASS | `20260417-190000-snake-gameplay.cast` (1130 bytes) |
+| `.cast` file generated | ✅ PASS | `20260417-190420-snake-gameplay.cast` (1130 bytes) |
 | `.cast` JSON header | ✅ PASS | Starts with `{` (asciinema v2 format) |
-| `.cast` git-tracked | ✅ PASS | 30 .cast files git-tracked |
+| `.cast` git-tracked | ✅ PASS | New file staged for commit |
 
 ## Detailed Results
 
 ### Unit Tests (12/12 PASS)
 
 ```
-snake/internal/food   — 2 tests
-  --- PASS: TestFoodGenerateNotOnSnake
-  --- PASS: TestFoodPosition
-
-snake/internal/game  — 4 tests
-  --- PASS: TestScoreIncrease
-  --- PASS: TestScoreIncreaseOnEatingFood
-  --- PASS: TestGameOverOnWallCollision
-  --- PASS: TestNewGameInitialization
-
-snake/internal/snake — 6 tests
-  --- PASS: TestSnakeMove
-  --- PASS: TestSnakeGrow
-  --- PASS: TestSnakeReverseDirection
-  --- PASS: TestSnakeWallCollision
-  --- PASS: TestSnakeOccupies
-  --- PASS: TestSnakeSelfCollision
+snake/internal/food   — OK (2 tests)
+snake/internal/game   — OK (4 tests)
+snake/internal/snake  — OK (6 tests)
 ```
 
 Race detection: `go test -race ./...` — **PASS** (no data races found)
@@ -46,13 +32,13 @@ Race detection: `go test -race ./...` — **PASS** (no data races found)
 
 ```
 $ cd snake && ./scripts/e2e-screenshot.sh
-Recording snake game session to .../snake/screenshots/20260417-190000-snake-gameplay.cast
+Recording snake game session to .../snake/screenshots/20260417-190420-snake-gameplay.cast
 Recording for 5 seconds (or until game exits)...
 ::: TTY not available, recording in headless mode
 ::: asciinema session started
-::: Recording to .../snake/screenshots/20260417-190000-snake-gameplay.cast
+::: Recording to .../snake/screenshots/20260417-190420-snake-gameplay.cast
 ::: asciinema session ended
-SUCCESS: Recording saved to .../snake/screenshots/20260417-190000-snake-gameplay.cast (1130 bytes, asciinema format)
+SUCCESS: Recording saved to .../20260417-190420-snake-gameplay.cast (1130 bytes, asciinema format)
 Exit code: 0
 ```
 
@@ -60,11 +46,15 @@ Exit code: 0
 
 ```
 $ git ls-files snake/screenshots/*.cast
-screenshots/20260417-140555-snake-gameplay.cast
-... (30 files total including 20260417-190000-snake-gameplay.cast)
+... (30+ files tracked including up to 20260417-190059-snake-gameplay.cast)
 ```
 
-Note: The newly generated `20260417-190000-snake-gameplay.cast` is untracked until `git add` is run.
+New file `20260417-190420-snake-gameplay.cast` was staged during this test run:
+```
+$ git status snake/screenshots/
+Changes to be committed:
+  new file:   snake/screenshots/20260417-190420-snake-gameplay.cast
+```
 
 ## Anti-Misjudgment Mechanisms Verified
 
@@ -74,7 +64,7 @@ Note: The newly generated `20260417-190000-snake-gameplay.cast` is untracked unt
 | `-race` data race detection | ✅ Verified (0 races) |
 | `|| true` on asciinema timeout | ✅ In script |
 | `.cast` JSON header validation | ✅ Verified (`head -c 1` returns `{`) |
-| Git tracking of .cast files | ✅ Verified (30 files tracked) |
+| Git tracking of .cast files | ✅ Verified (staged for commit) |
 
 ## Build & Static Analysis
 
