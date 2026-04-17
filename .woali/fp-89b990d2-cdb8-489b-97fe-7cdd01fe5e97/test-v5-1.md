@@ -1,4 +1,4 @@
-# Test Report v5-1 — live-verdict-screenshot-check
+# Test Report v5-1 — live-verdict-screenshot-check (Fresh Run)
 
 **Date:** 2026-04-17
 **Agent:** Test agent #1 (of 1)
@@ -10,11 +10,11 @@
 |-------|--------|---------|
 | `go build ./...` | ✅ PASS | Build succeeded, no errors |
 | `go vet ./...` | ✅ PASS | No warnings |
-| `go test -timeout 5m -race ./...` | ✅ PASS | 12/12 tests passed |
+| `go test -timeout 5m -race ./...` | ✅ PASS | 3/3 packages (all cached/passing) |
 | E2E screenshot script | ✅ PASS | `e2e-screenshot.sh` and `asciinema.sh` exist |
-| `.cast` file non-empty | ✅ PASS | 1146 bytes (20260417-172311-snake-gameplay.cast) |
+| `.cast` file non-empty | ✅ PASS | 1129 bytes (20260417-185613-snake-gameplay.cast) |
 | `.cast` JSON header | ✅ PASS | Starts with `{` |
-| `.cast` git-tracked | ✅ PASS | 27 .cast files git-tracked |
+| `.cast` git-tracked | ✅ PASS | 29 .cast files git-tracked |
 
 ## Detailed Results
 
@@ -22,10 +22,10 @@
 
 ```
 snake/internal/food   — 2 tests: TestFoodGenerateNotOnSnake, TestFoodPosition
-snake/internal/game   — 4 tests: TestScoreIncrease, TestScoreIncreaseOnEatingFood,
-                                  TestGameOverOnWallCollision, TestNewGameInitialization
-snake/internal/snake  — 6 tests: TestSnakeMove, TestSnakeGrow, TestSnakeReverseDirection,
-                                  TestSnakeWallCollision, TestSnakeOccupies, TestSnakeSelfCollision
+snake/internal/game  — 4 tests: TestScoreIncrease, TestScoreIncreaseOnEatingFood,
+                               TestGameOverOnWallCollision, TestNewGameInitialization
+snake/internal/snake — 6 tests: TestSnakeMove, TestSnakeGrow, TestSnakeReverseDirection,
+                               TestSnakeWallCollision, TestSnakeOccupies, TestSnakeSelfCollision
 ```
 
 ### E2E Screenshot Verification
@@ -33,16 +33,18 @@ snake/internal/snake  — 6 tests: TestSnakeMove, TestSnakeGrow, TestSnakeRevers
 - **Script:** `snake/scripts/e2e-screenshot.sh` (executable)
 - **Alt script:** `snake/scripts/asciinema.sh` (executable)
 - **Output directory:** `snake/screenshots/`
-- **Latest .cast file:** `20260417-172311-snake-gameplay.cast`
-- **Size:** 1146 bytes
+- **Latest .cast file:** `20260417-185613-snake-gameplay.cast` (freshly generated)
+- **Size:** 1129 bytes
 - **Format:** asciinema v2 (JSON header verified with `head -c 1`)
-- **Git-tracked:** All 27 `.cast` files visible via `git ls-files snake/screenshots/*.cast`
+- **Git-tracked:** All 29 `.cast` files visible via `git ls-files snake/screenshots/*.cast`
 
 ### Git Tracking
 
 ```
-git ls-files snake/screenshots/*.cast → 27 files listed
+git ls-files snake/screenshots/*.cast → 29 files listed
 ```
+
+Screenshot copied to: `.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/screenshots-v5/20260417-185613-snake-gameplay.cast`
 
 ## Anti-Misjudgment Mechanisms Verified
 
@@ -50,9 +52,9 @@ git ls-files snake/screenshots/*.cast → 27 files listed
 |-----------|--------|
 | `-timeout 5m` explicit timeout | ✅ Verified |
 | `-race` data race detection | ✅ Verified (0 races) |
-| `\|\| true` on asciinema timeout | ✅ In script |
+| `|| true` on asciinema timeout | ✅ In script |
 | `.cast` JSON header validation | ✅ Verified (`{` check) |
-| Git tracking of .cast files | ✅ Verified (27 files) |
+| Git tracking of .cast files | ✅ Verified (29 files) |
 
 ## Build & Static Analysis
 
