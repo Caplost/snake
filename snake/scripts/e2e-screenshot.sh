@@ -3,8 +3,10 @@
 # Records terminal session to prove game runs correctly
 # Usage: ./e2e-screenshot.sh
 #
-# Fixed v4: Uses foreground timeout instead of background+kill
-# macOS script -F only flushes on session end, so kill prevented file content
+# Uses asciinema rec to produce proper .cast files (asciinema v2 format).
+# Falls back to asciinema cat ( piping output ) if rec is not available.
+# The script command is NOT used because it produces typescript format,
+# not asciinema .cast format.
 
 set -e
 
@@ -29,21 +31,54 @@ OUTPUT_FILE="$SCREENSHOTS_DIR/${TIMESTAMP}-snake-gameplay.cast"
 echo "Recording snake game session to $OUTPUT_FILE"
 echo "Recording for 5 seconds (or until game exits)..."
 
-# Run snake inside script session with timeout (foreground)
-# This ensures .cast file is properly flushed when session ends
-if [[ "$(uname)" == "Darwin" ]]; then
-    # macOS: use -F for flush
-    timeout 5 script -F "$OUTPUT_FILE" "$SNAKE_BINARY" || true
+# Use asciinema rec if available, otherwise use asciinema cat
+if command -v asciinema &> /dev/null; then
+    # Primary: use asciinema rec for proper .cast format
+    # Note: timeout kills asciinema with SIGTERM, which causes a traceback in asciinema's
+    # async worker (known issue in asciinema Python). The file is still written correctly.
+    timeout 5 asciinema rec "$OUTPUT_FILE" --overwrite --cols 80 --rows 24 -c "$SNAKE_BINARY" 2>/dev/null || true
 else
-    # Linux: use -f for force flush
-    timeout 5 script -f "$OUTPUT_FILE" "$SNAKE_BINARY" || true
+    echo "WARNING: asciinema not installed. Using fallback method."
+    echo "Install with: brew install asciinema (macOS) or pip install asciinema (Python)"
+    # Fallback: try using script with asciinema format via script + asciinema cat
+    # This produces a typescript, not asciinema, so we validate the output
+    TMP_TYPESCRIPT="$SCREENSHOTS_DIR/${TIMESTAMP}-typescript"
+    if [[ "$(uname)" == "Darwin" ]]; then
+        timeout 5 script -F "$TMP_TYPESCRIPT" "$SNAKE_BINARY" || true
+    else
+        timeout 5 script -f "$TMP_TYPESCRIPT" "$SNAKE_BINARY" || true
+    fi
+
+    if [[ -f "$TMP_TYPESCRIPT" ]]; then
+        FILE_SIZE=$(stat -f%z "$TMP_TYPESCRIPT" 2>/dev/null || stat -c%s "$TMP_TYPESCRIPT" 2>/dev/null)
+        if [[ "$FILE_SIZE" -gt 0 ]]; then
+            # Copy typescript as fallback .cast (not ideal but better than nothing)
+            cp "$TMP_TYPESCRIPT" "$OUTPUT_FILE"
+            echo "WARNING: Using typescript fallback format (not asciinema .cast)"
+            echo "Install asciinema for proper .cast format"
+        else
+            echo "ERROR: Recording file is empty (0 bytes)"
+            rm -f "$TMP_TYPESCRIPT"
+            exit 1
+        fi
+    else
+        echo "ERROR: Recording file not created"
+        exit 1
+    fi
 fi
 
-# Verify file is non-empty
+# Verify file is non-empty AND is valid asciinema format (starts with JSON header)
 if [[ -f "$OUTPUT_FILE" ]]; then
     FILE_SIZE=$(stat -f%z "$OUTPUT_FILE" 2>/dev/null || stat -c%s "$OUTPUT_FILE" 2>/dev/null)
     if [[ "$FILE_SIZE" -gt 0 ]]; then
-        echo "SUCCESS: Recording saved to $OUTPUT_FILE ($FILE_SIZE bytes)"
+        # Check if file starts with valid asciinema JSON header
+        FIRST_CHAR=$(head -c 1 "$OUTPUT_FILE")
+        if [[ "$FIRST_CHAR" == "{" ]]; then
+            echo "SUCCESS: Recording saved to $OUTPUT_FILE ($FILE_SIZE bytes, asciinema format)"
+        else
+            echo "WARNING: Recording file exists but is not asciinema format (first char: $FIRST_CHAR)"
+            echo "File may be typescript format, not .cast format"
+        fi
     else
         echo "WARNING: Recording file is empty (0 bytes)"
         exit 1

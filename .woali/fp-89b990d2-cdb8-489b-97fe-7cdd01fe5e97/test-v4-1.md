@@ -7,9 +7,9 @@
 | Build (`go build ./...`) | **PASS** |
 | Vet (`go vet ./...`) | **PASS** |
 | Unit Tests (`go test -timeout 5m -race ./...`) | **PASS** — 12/12 tests |
-| E2E Script (`e2e-screenshot.sh`) | **PASS** — exit 0, 255 bytes |
-| E2E Script (`asciinema.sh`) | **PASS** — executable |
-| `.cast` file non-empty | **PASS** — 255 bytes |
+| E2E Script (`e2e-screenshot.sh`) | **PASS** — exit 0 |
+| `.cast` file non-empty | **PASS** — 981 bytes |
+| `.cast` file is asciinema format | **PASS** — JSON header `{"version": 2,...}` |
 | `screenshots/` with `.gitkeep` | **PASS** |
 
 ## 1. Build & Static Analysis
@@ -24,56 +24,23 @@ $ go vet ./...
 ## 2. Unit Tests
 
 ```
-$ go test -timeout 5m -race -v ./...
-=== RUN   TestFoodGenerateNotOnSnake
---- PASS: TestFoodGenerateNotOnSnake (0.00s)
-=== RUN   TestFoodPosition
---- PASS: TestFoodPosition (0.00s)
-PASS
-ok   snake/internal/food
-=== RUN   TestScoreIncrease
---- PASS: TestScoreIncrease (0.00s)
-=== RUN   TestScoreIncreaseOnEatingFood
---- PASS: TestScoreIncreaseOnEatingFood (0.00s)
-=== RUN   TestGameOverOnWallCollision
---- PASS: TestGameOverOnWallCollision (0.00s)
-=== RUN   TestNewGameInitialization
---- PASS: TestNewGameInitialization (0.00s)
-PASS
-ok   snake/internal/game
-=== RUN   TestSnakeMove
---- PASS: TestSnakeMove (0.00s)
-=== RUN   TestSnakeGrow
---- PASS: TestSnakeGrow (0.00s)
-=== RUN   TestSnakeReverseDirection
---- PASS: TestSnakeReverseDirection (0.00s)
-=== RUN   TestSnakeWallCollision
---- PASS: TestSnakeWallCollision (0.00s)
-=== RUN   TestSnakeOccupies
---- PASS: TestSnakeOccupies (0.00s)
-=== RUN   TestSnakeSelfCollision
---- PASS: TestSnakeSelfCollision (0.00s)
-PASS
-ok   snake/internal/snake
+$ go test -timeout 5m -race ./...
+ok   snake/internal/food   (cached)
+ok   snake/internal/game   (cached)
+ok   snake/internal/snake  (cached)
 ```
 
 All 12 tests pass with race detection enabled.
 
-## 3. E2E Script Validation
-
-| Check | Result |
-|-------|--------|
-| `scripts/e2e-screenshot.sh` exists & executable | PASS |
-| `scripts/asciinema.sh` exists & executable | PASS |
-| `screenshots/` directory with `.gitkeep` | PASS |
+## 3. E2E Screenshot Validation
 
 ### E2E Execution
 
 ```
 $ ./scripts/e2e-screenshot.sh
-Recording snake game session to .../snake/screenshots/20260417-142206-snake-gameplay.cast
+Recording snake game session to ...snake/screenshots/20260417-142809-snake-gameplay.cast
 Recording for 5 seconds (or until game exits)...
-SUCCESS: Recording saved to .../snake/screenshots/20260417-142206-snake-gameplay.cast (255 bytes)
+SUCCESS: Recording saved to ...snake/screenshots/20260417-142809-snake-gameplay.cast (981 bytes, asciinema format)
 Done!
 ```
 
@@ -81,10 +48,20 @@ Exit code: **0**
 
 ### `.cast` File Verification
 
+**Format check**: First character is `{` (JSON header) — PASS
+
+**Content** (first 300 chars):
+```json
+{"version": 2, "width": 80, "height": 24, "timestamp": 1776407289, "env": {"SHELL": "/bin/zsh", "TERM": "xterm-256color"}}
+[0.019555, "o", "\u001b[?1049h\u001b[?1h\u001b=\u001b[?25l\u001b[?2J"]
+[0.019905, "o", "\u001b[?1006l\u001b[?1015l\u001b[?1002l\u001b[?1000l..."]
 ```
-$ test -s screenshots/20260417-142206-snake-gameplay.cast && echo "non-empty"
-non-empty  (255 bytes)
-```
+
+This is a **valid asciinema v2 format** file with:
+- JSON header with version, dimensions, timestamp, environment
+- Timing frames with format: `[time, "o" (stdout), "data"]`
+
+**v4 fix validated**: The `.cast` file is now proper asciinema format, not typescript format from `script` command.
 
 ## 4. Anti-Misjudgment Mechanisms
 
@@ -92,13 +69,19 @@ non-empty  (255 bytes)
 |-----------|--------|
 | `-timeout 5m` on tests | Verified — explicit timeout flag used |
 | `-race` flag | Verified — race detector passed |
-| Foreground `timeout` in E2E script | Verified — `script -F` flushes on session end |
+| `asciinema rec` | Verified — proper .cast format produced |
+| JSON header validation | Verified — first char is `{` |
 
 ## 5. Screenshots Captured
 
 Latest `.cast` file saved to:
-- `snake/screenshots/20260417-142206-snake-gameplay.cast` (255 bytes)
+- `snake/screenshots/20260417-142809-snake-gameplay.cast` (981 bytes, asciinema format)
 - Copied to `.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/screenshots-v4/`
+
+## 6. Prerequisites
+
+- `asciinema` installed at `/Users/wangyinneng/Library/Python/3.9/bin/asciinema` (v2.4.0)
+- Without asciinema, the script falls back to `script` command with a warning
 
 ## Final Verdict
 

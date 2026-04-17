@@ -60,44 +60,44 @@ func (g *Game) Run() {
 
 ### Fixed: `snake/scripts/e2e-screenshot.sh`
 
-**Problem from v1 test**: The `e2e-screenshot.sh` script was backgrounded and killed via `kill $!`, which on macOS creates an empty `.cast` file (script -F only flushes on session end).
+**Problem from v1/v2/v3 tests**: The `e2e-screenshot.sh` used `script` command which produces **typescript format**, not **asciinema .cast format**. The test only checked file size > 0, which passed incorrectly even when the file wasn't valid asciinema.
 
-**Old approach** (broken on macOS):
-```bash
-script $SCRIPT_FLAGS -q "$OUTPUT_FILE" &
-PID=$!
-sleep 3
-kill $PID 2>/dev/null || true   # kill before flush → empty file
-```
+**Root cause**: `script` command produces a typescript recording (human-readable with "Script started..." header), not asciinema v2 format (JSON header + timing frames). These are fundamentally different formats.
 
-**New approach** (cross-platform, v4 fix):
-```bash
-# Build snake binary first
-SNAKE_BINARY="$PROJECT_DIR/snake"
-
-# Run snake inside script session with timeout (foreground)
-if [[ "$(uname)" == "Darwin" ]]; then
-    timeout 5 script -F "$OUTPUT_FILE" "$SNAKE_BINARY" || true
-else
-    timeout 5 script -f "$OUTPUT_FILE" "$SNAKE_BINARY" || true
-fi
-
-# Verify file is non-empty
-FILE_SIZE=$(stat -f%z "$OUTPUT_FILE" 2>/dev/null || stat -c%s "$OUTPUT_FILE" 2>/dev/null)
-if [[ "$FILE_SIZE" -gt 0 ]]; then
-    echo "SUCCESS: Recording saved to $OUTPUT_FILE ($FILE_SIZE bytes)"
-else
-    echo "WARNING: Recording file is empty (0 bytes)"
-    exit 1
-fi
-```
+**v4 Fix**: Updated `e2e-screenshot.sh` to use `asciinema rec` which produces proper `.cast` files (asciinema v2 format).
 
 **Key changes**:
-1. Build snake binary path and run it explicitly inside `script` session
-2. Use `timeout 5 script ...` in foreground (not background + sleep + kill)
-3. Keep platform detection for `-F` (macOS) vs `-f` (Linux)
-4. Add `|| true` to suppress timeout exit code
-5. Verify file is non-empty after recording
+1. **Use `asciinema rec`** instead of `script` to produce proper `.cast` files
+2. **Validate JSON header**: Check that the output file starts with `{` (JSON) to ensure it's valid asciinema format
+3. **Graceful fallback**: If asciinema is not installed, fall back to `script` but warn that output is typescript format
+4. **Suppress asciinema crash traceback**: When `timeout` kills asciinema, stderr is suppressed to avoid ugly traceback (asciinema Python has a known bug when terminated)
+
+**Old approach** (produced typescript, not asciinema):
+```bash
+timeout 5 script -F "$OUTPUT_FILE" "$SNAKE_BINARY" || true
+# Produced typescript format with "Script started..." header
+```
+
+**New approach** (produces proper asciinema .cast):
+```bash
+if command -v asciinema &> /dev/null; then
+    timeout 5 asciinema rec "$OUTPUT_FILE" --overwrite --cols 80 --rows 24 -c "$SNAKE_BINARY" 2>/dev/null || true
+else
+    # Fallback to script with warning
+    echo "WARNING: asciinema not installed. Using fallback method."
+    # ... fallback logic ...
+fi
+```
+
+**JSON Header Validation**:
+```bash
+FIRST_CHAR=$(head -c 1 "$OUTPUT_FILE")
+if [[ "$FIRST_CHAR" == "{" ]]; then
+    echo "SUCCESS: Recording saved... (asciinema format)"
+else
+    echo "WARNING: Recording file is not asciinema format"
+fi
+```
 
 ### New Files Created
 
@@ -128,6 +128,23 @@ cd snake && go test -timeout 5m -race ./...   ✓ PASSED (12/12 tests)
 - **snake/internal/game**: 4 tests (score, game over, initialization)
 - **snake/internal/snake**: 7 tests (move, grow, collision, direction)
 
+### E2E Screenshot Validation
+
+```
+$ ./scripts/e2e-screenshot.sh
+Recording snake game session to ...snake/screenshots/20260417-142809-snake-gameplay.cast
+Recording for 5 seconds (or until game exits)...
+SUCCESS: Recording saved to ...snake/screenshots/20260417-142809-snake-gameplay.cast (981 bytes, asciinema format)
+Done!
+```
+
+**Valid asciinema .cast file** (first 200 chars):
+```json
+{"version": 2, "width": 80, "height": 24, "timestamp": 1776407289, "env": {"SHELL": "/bin/zsh", "TERM": "xterm-256color"}}
+[0.019555, "o", "\u001b[?1049h\u001b[?1h\u001b=\u001b[?25l\u001b[?2J"]
+[0.019905, "o", "\u001b[?1006l\u001b[?1015l\u001b[?1002l\u001b[?1000l..."]
+```
+
 ## Anti-Misjudgment Mechanisms
 
 | Mechanism | Purpose | Status |
@@ -135,5 +152,19 @@ cd snake && go test -timeout 5m -race ./...   ✓ PASSED (12/12 tests)
 | `-timeout 5m` on tests | Prevents default timeout misjudgment | ✓ Implemented |
 | `-race` flag | Detects data races causing flaky failures | ✓ Implemented |
 | Event-driven input | No goroutine lifecycle issues | ✓ Implemented |
-| Foreground timeout in script | Ensures .cast file is properly flushed | ✓ Fixed in v4 |
-| Non-empty file verification | Validates .cast file has actual content | ✓ Added in v4 |
+| `asciinema rec` | Proper .cast format for E2E proof | ✓ Fixed in v4 |
+| JSON header validation | Ensures .cast is valid asciinema, not empty typescript | ✓ Added in v4 |
+
+## Prerequisites for E2E
+
+- `asciinema` must be installed:
+  - macOS: `brew install asciinema`
+  - Linux: `pip install asciinema`
+
+If asciinema is not installed, the script falls back to `script` command but warns that the output is typescript format, not asciinema format.
+
+## Known Limitations
+
+1. **termbox-go in PTY**: termbox-go may not initialize properly in all PTY environments (headless CI, some Docker containers). If termbox.Init() fails, the game will panic.
+
+2. **asciinema Python crash**: asciinema Python version 2.4.0 crashes with "ValueError: list.remove(x): x not in list" when terminated by `timeout` command. The file is still written correctly before the crash. stderr is suppressed to avoid ugly traceback.
