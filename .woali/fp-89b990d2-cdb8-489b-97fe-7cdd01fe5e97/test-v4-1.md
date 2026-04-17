@@ -3,7 +3,7 @@
 ## Test Environment
 
 - **Platform**: macOS (darwin)
-- **Working Directory**: `/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake`
+- **Working Directory**: snake/
 - **Go Version**: 1.21+
 - **Test Date**: 2026-04-17
 
@@ -14,11 +14,10 @@
 | Build | `go build ./...` | PASS |
 | Vet | `go vet ./...` | PASS |
 | Unit Tests | `go test -timeout 5m -race ./...` | PASS (12/12 tests) |
-| E2E Script exists | `e2e-screenshot.sh` | PASS (executable) |
-| E2E Script exists | `asciinema.sh` | PASS (executable) |
-| Screenshots dir | `screenshots/` with `.gitkeep` | PASS |
-| E2E Recording | `.cast` file generated | PASS |
-| E2E Recording | `.cast` file non-empty | PASS (490 bytes) |
+| E2E Script | `e2e-screenshot.sh` | PASS (executable) |
+| E2E Script | `asciinema.sh` | PASS (executable) |
+| Screenshots dir | `screenshots/` | PASS |
+| E2E Recording | Fresh `.cast` file generated | PASS (255 bytes) |
 
 ## Detailed Test Results
 
@@ -54,22 +53,30 @@ All 3 packages pass with race detection enabled. No data races detected.
 
 **Result**: PASS (12/12 tests)
 
-### 4. E2E Screenshot Verification
+### 4. E2E Screenshot Script
 
 ```
 $ cd snake && ./scripts/e2e-screenshot.sh
-Recording snake game session to .../snake/screenshots/20260417-140555-snake-gameplay.cast
-Recording for 3 seconds...
-Recording saved to .../snake/screenshots/20260417-140555-snake-gameplay.cast
-
-$ ls -la screenshots/*.cast
--rw-r--r--@ 1 wangyinneng  staff  490 Apr 17 14:05 screenshots/20260417-140555-snake-gameplay.cast
-
-$ test -s screenshots/*.cast && echo "File is non-empty: PASS"
-File is non-empty: PASS
+Recording snake game session to .../snake/screenshots/20260417-141228-snake-gameplay.cast
+Recording for 5 seconds (or until game exits)...
+SUCCESS: Recording saved to .../snake/screenshots/20260417-141228-snake-gameplay.cast (255 bytes)
+Done! Recording: .../snake/screenshots/20260417-141228-snake-gameplay.cast
 ```
 
-**Result**: PASS - `.cast` file generated and non-empty (490 bytes)
+**Result**: PASS - E2E script exits 0 and creates non-empty .cast file
+
+### 5. Screenshots Directory
+
+```
+$ ls screenshots/
+20260417-140555-snake-gameplay.cast
+20260417-141140-snake-gameplay.cast
+20260417-141228-snake-gameplay.cast
+```
+
+Fresh recording (20260417-141228-snake-gameplay.cast) is 255 bytes — non-empty.
+
+**Result**: PASS
 
 ### Anti-Misjudgment Mechanisms Verified
 
@@ -79,8 +86,10 @@ File is non-empty: PASS
 
 ## Screenshots
 
-E2E screenshot captured:
-- `snake/screenshots/20260417-140555-snake-gameplay.cast` (490 bytes)
+E2E screenshots captured:
+- `snake/screenshots/20260417-141228-snake-gameplay.cast` (255 bytes) — latest
+
+Copied to: `.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/screenshots-v4/`
 
 ---
 
