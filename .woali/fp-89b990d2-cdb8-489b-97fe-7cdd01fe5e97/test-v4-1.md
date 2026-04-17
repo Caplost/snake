@@ -52,15 +52,19 @@ cd snake && ./scripts/e2e-screenshot.sh
 
 **Result**: PASS
 - Script exited successfully (exit 0)
-- `.cast` file created at `snake/screenshots/20260417-143538-snake-gameplay.cast`
-- File size: **1129 bytes** (> 0)
-- File starts with valid asciinema JSON header: `{"version":3,...`
+- `.cast` files created:
+  - `snake/screenshots/20260417-144153-snake-gameplay.cast` — 1128 bytes
+  - `snake/screenshots/20260417-144158-snake-gameplay.cast` — 1146 bytes
+- Both files start with valid asciinema JSON header: `{"version":3,...`
 
 ### 5. Screenshots Captured
 
 | File | Size |
 |------|------|
-| `20260417-143538-snake-gameplay.cast` | 1129 bytes |
+| `20260417-144153-snake-gameplay.cast` | 1128 bytes |
+| `20260417-144158-snake-gameplay.cast` | 1146 bytes |
+
+Screenshots saved to `.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/screenshots-v4/`
 
 ---
 
