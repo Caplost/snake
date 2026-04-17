@@ -1,7 +1,9 @@
 {
   "sessionId": "session-61c0db57-2eab-49d4-9d3d-6f86366d62b0",
   "stage": "test",
-  "claudeSessionId": null,
-  "transcriptPath": null,
-  "startedAt": "2026-04-17T11:12:49.847Z"
+  "claudeSessionId": "4f30b8fc-b05a-4e67-a7c2-c03f78c49faf",
+  "transcriptPath": "/Users/wangyinneng/.claude/projects/-Users-wangyinneng-SaaS-Woali-workspace-room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca-feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/4f30b8fc-b05a-4e67-a7c2-c03f78c49faf.jsonl",
+  "startedAt": "2026-04-17T11:12:49.847Z",
+  "endedAt": "2026-04-17T11:14:55.119Z",
+  "status": "completed"
 }
