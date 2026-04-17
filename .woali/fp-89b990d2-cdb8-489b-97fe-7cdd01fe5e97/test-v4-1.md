@@ -67,6 +67,7 @@ cd snake && ./scripts/e2e-screenshot.sh
 | `20260417-144259-snake-gameplay.cast` | 1129 bytes |
 | `20260417-144408-snake-gameplay.cast` | 1129 bytes |
 | `20260417-144631-snake-gameplay.cast` | 1116 bytes |
+| `20260417-144714-snake-gameplay.cast` | 1130 bytes |
 
 Screenshots saved to `.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/screenshots-v4/`
 
