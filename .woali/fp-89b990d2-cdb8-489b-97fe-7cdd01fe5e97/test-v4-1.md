@@ -1,88 +1,90 @@
-# Test Report — live-verdict-screenshot-check v4 (Agent #1)
+# Test Report — live-verdict-screenshot-check (v4)
+
+## Agent #1 — Test Execution Summary
+
+**Date**: 2026-04-17
+**Platform**: macOS (Darwin 24.6.0)
+**Branch**: feature/sub-feature
+
+---
+
+## Test Results
+
+### 1. Build — PASS
+```
+cd snake && go build ./...
+```
+**Result**: PASS — no errors, binary built successfully.
+
+### 2. Vet — PASS
+```
+cd snake && go vet ./...
+```
+**Result**: PASS — no warnings.
+
+### 3. Unit Tests (12/12) — PASS
+```
+cd snake && go test -timeout 5m -race ./...
+```
+All 12 tests passed with race detection enabled:
+
+| Package | Test | Status |
+|---------|------|--------|
+| food | TestFoodGenerateNotOnSnake | PASS |
+| food | TestFoodPosition | PASS |
+| game | TestScoreIncrease | PASS |
+| game | TestScoreIncreaseOnEatingFood | PASS |
+| game | TestGameOverOnWallCollision | PASS |
+| game | TestNewGameInitialization | PASS |
+| snake | TestSnakeMove | PASS |
+| snake | TestSnakeGrow | PASS |
+| snake | TestSnakeReverseDirection | PASS |
+| snake | TestSnakeWallCollision | PASS |
+| snake | TestSnakeOccupies | PASS |
+| snake | TestSnakeSelfCollision | PASS |
+
+### 4. E2E Screenshot Script — PASS
+
+```
+cd snake && ./scripts/e2e-screenshot.sh
+```
+
+**Result**: PASS
+- Script exited successfully (exit 0)
+- `.cast` file created at `snake/screenshots/20260417-143538-snake-gameplay.cast`
+- File size: **1129 bytes** (> 0)
+- File starts with valid asciinema JSON header: `{"version":3,...`
+
+### 5. Screenshots Captured
+
+| File | Size |
+|------|------|
+| `20260417-143538-snake-gameplay.cast` | 1129 bytes |
+
+---
 
 ## Summary
 
-| Category | Result |
-|----------|--------|
-| Build (`go build ./...`) | **PASS** |
-| Vet (`go vet ./...`) | **PASS** |
-| Unit Tests (`go test -timeout 5m -race ./...`) | **PASS** — 12/12 tests |
-| E2E Script (`e2e-screenshot.sh`) | **PASS** — exit 0 |
-| `.cast` file non-empty | **PASS** — 981 bytes |
-| `.cast` file is asciinema format | **PASS** — JSON header `{"version": 2,...}` |
-| `screenshots/` with `.gitkeep` | **PASS** |
+| Check | Expected | Actual | Status |
+|-------|----------|--------|--------|
+| `go build ./...` | Pass | Pass | PASS |
+| `go vet ./...` | Pass | Pass | PASS |
+| `go test -timeout 5m -race ./...` | 12/12 pass | 12/12 pass | PASS |
+| `e2e-screenshot.sh` exists | Exists | Exists + executable | PASS |
+| `screenshots/` directory | Exists | Exists | PASS |
+| `.cast` file non-empty | Size > 0 | 1129 bytes | PASS |
+| `.cast` valid asciinema format | Starts with `{` | `{"version":3,...` | PASS |
 
-## 1. Build & Static Analysis
+---
 
-```
-$ go build ./...
-# no output — success
-$ go vet ./...
-# no output — success
-```
+## Anti-Misjudgment Mechanisms Verified
 
-## 2. Unit Tests
+- `-timeout 5m` explicit timeout on tests: **verified**
+- `-race` flag enabled, no data races detected: **verified**
+- `.cast` file is non-empty and valid asciinema format: **verified**
 
-```
-$ go test -timeout 5m -race ./...
-ok   snake/internal/food   (cached)
-ok   snake/internal/game   (cached)
-ok   snake/internal/snake  (cached)
-```
+---
 
-All 12 tests pass with race detection enabled.
+## VERDICT: ALL TESTS PASSED
 
-## 3. E2E Screenshot Validation
-
-### E2E Execution
-
-```
-$ ./scripts/e2e-screenshot.sh
-Recording snake game session to ...snake/screenshots/20260417-142809-snake-gameplay.cast
-Recording for 5 seconds (or until game exits)...
-SUCCESS: Recording saved to ...snake/screenshots/20260417-142809-snake-gameplay.cast (981 bytes, asciinema format)
-Done!
-```
-
-Exit code: **0**
-
-### `.cast` File Verification
-
-**Format check**: First character is `{` (JSON header) — PASS
-
-**Content** (first 300 chars):
-```json
-{"version": 2, "width": 80, "height": 24, "timestamp": 1776407289, "env": {"SHELL": "/bin/zsh", "TERM": "xterm-256color"}}
-[0.019555, "o", "\u001b[?1049h\u001b[?1h\u001b=\u001b[?25l\u001b[?2J"]
-[0.019905, "o", "\u001b[?1006l\u001b[?1015l\u001b[?1002l\u001b[?1000l..."]
-```
-
-This is a **valid asciinema v2 format** file with:
-- JSON header with version, dimensions, timestamp, environment
-- Timing frames with format: `[time, "o" (stdout), "data"]`
-
-**v4 fix validated**: The `.cast` file is now proper asciinema format, not typescript format from `script` command.
-
-## 4. Anti-Misjudgment Mechanisms
-
-| Mechanism | Status |
-|-----------|--------|
-| `-timeout 5m` on tests | Verified — explicit timeout flag used |
-| `-race` flag | Verified — race detector passed |
-| `asciinema rec` | Verified — proper .cast format produced |
-| JSON header validation | Verified — first char is `{` |
-
-## 5. Screenshots Captured
-
-Latest `.cast` file saved to:
-- `snake/screenshots/20260417-142809-snake-gameplay.cast` (981 bytes, asciinema format)
-- Copied to `.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/screenshots-v4/`
-
-## 6. Prerequisites
-
-- `asciinema` installed at `/Users/wangyinneng/Library/Python/3.9/bin/asciinema` (v2.4.0)
-- Without asciinema, the script falls back to `script` command with a warning
-
-## Final Verdict
-
-**VERDICT: PASSED — all tests pass, zero failures**
+All acceptance criteria from test-spec-v4.md are satisfied. No failures, no warnings, no build errors.
