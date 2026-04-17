@@ -2,7 +2,7 @@
 
 ## Summary
 
-This sub-feature adds E2E screenshot capability for the snake game to prevent test misjudgment due to infrastructure timeouts and to provide visual proof of game functionality in PRs. The implementation uses event-driven input handling without background goroutines.
+This sub-feature adds E2E screenshot capability for the snake game to prevent test misjudgment due to infrastructure timeouts and to provide visual proof of game functionality in PRs.
 
 ## Context
 
@@ -24,7 +24,7 @@ This sub-feature adds E2E screenshot capability for the snake game to prevent te
 
 ### Event-Driven Input Architecture
 
-The current implementation uses termbox's `PollEvent()` for blocking, event-driven input:
+The implementation uses termbox's `PollEvent()` for blocking, event-driven input:
 
 ```go
 func (g *Game) Run() {
@@ -56,30 +56,61 @@ func (g *Game) Run() {
 }
 ```
 
-### Key Design Decisions
-
-1. **No background input goroutine**: Input is handled synchronously in the main loop
-2. **Blocking termbox.PollEvent()**: Eliminates 16ms polling overhead
-3. **Mutex-protected state**: `score`, `gameOver`, `direction` protected by `sync.Mutex`
-4. **rand.Seed in reset()**: Seed moved to reset() to ensure proper randomization on restart
-
 ## Changes Made (v4)
+
+### Fixed: `snake/scripts/e2e-screenshot.sh`
+
+**Problem from v1 test**: The `e2e-screenshot.sh` script was backgrounded and killed via `kill $!`, which on macOS creates an empty `.cast` file (script -F only flushes on session end).
+
+**Old approach** (broken on macOS):
+```bash
+script $SCRIPT_FLAGS -q "$OUTPUT_FILE" &
+PID=$!
+sleep 3
+kill $PID 2>/dev/null || true   # kill before flush → empty file
+```
+
+**New approach** (cross-platform, v4 fix):
+```bash
+# Build snake binary first
+SNAKE_BINARY="$PROJECT_DIR/snake"
+
+# Run snake inside script session with timeout (foreground)
+if [[ "$(uname)" == "Darwin" ]]; then
+    timeout 5 script -F "$OUTPUT_FILE" "$SNAKE_BINARY" || true
+else
+    timeout 5 script -f "$OUTPUT_FILE" "$SNAKE_BINARY" || true
+fi
+
+# Verify file is non-empty
+FILE_SIZE=$(stat -f%z "$OUTPUT_FILE" 2>/dev/null || stat -c%s "$OUTPUT_FILE" 2>/dev/null)
+if [[ "$FILE_SIZE" -gt 0 ]]; then
+    echo "SUCCESS: Recording saved to $OUTPUT_FILE ($FILE_SIZE bytes)"
+else
+    echo "WARNING: Recording file is empty (0 bytes)"
+    exit 1
+fi
+```
+
+**Key changes**:
+1. Build snake binary path and run it explicitly inside `script` session
+2. Use `timeout 5 script ...` in foreground (not background + sleep + kill)
+3. Keep platform detection for `-F` (macOS) vs `-f` (Linux)
+4. Add `|| true` to suppress timeout exit code
+5. Verify file is non-empty after recording
 
 ### New Files Created
 
 | File | Description |
 |------|-------------|
 | `snake/screenshots/.gitkeep` | Placeholder to version-control screenshots directory |
-| `snake/scripts/e2e-screenshot.sh` | E2E screenshot script using `script` command |
 | `snake/scripts/asciinema.sh` | Alternative E2E recording using asciinema |
 
 ### No Go Code Changes Required
 
-The v4 plan described fixes for:
+The Go code was already correct:
 - **CRITICAL - Input goroutine not restarting**: Already resolved - no goroutine exists
 - **HIGH - Polling input inefficiency**: Already resolved - using `PollEvent()` blocking
-
-The implementation is already correct and matches the v4 plan's target architecture.
 
 ## Verification
 
@@ -97,14 +128,6 @@ cd snake && go test -timeout 5m -race ./...   ✓ PASSED (12/12 tests)
 - **snake/internal/game**: 4 tests (score, game over, initialization)
 - **snake/internal/snake**: 7 tests (move, grow, collision, direction)
 
-## Architecture Notes
-
-The implementation is non-invasive to the existing Go codebase:
-- No modifications to existing `.go` files needed
-- E2E screenshot capability provided via shell scripts
-- Uses `script` command (macOS/Linux) for terminal session recording
-- Alternative asciinema方案 for cross-platform support
-
 ## Anti-Misjudgment Mechanisms
 
 | Mechanism | Purpose | Status |
@@ -112,3 +135,5 @@ The implementation is non-invasive to the existing Go codebase:
 | `-timeout 5m` on tests | Prevents default timeout misjudgment | ✓ Implemented |
 | `-race` flag | Detects data races causing flaky failures | ✓ Implemented |
 | Event-driven input | No goroutine lifecycle issues | ✓ Implemented |
+| Foreground timeout in script | Ensures .cast file is properly flushed | ✓ Fixed in v4 |
+| Non-empty file verification | Validates .cast file has actual content | ✓ Added in v4 |

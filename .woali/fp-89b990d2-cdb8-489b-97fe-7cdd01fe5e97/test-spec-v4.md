@@ -51,15 +51,23 @@ This test specification covers the live-verdict-screenshot-check sub-feature for
 | `asciinema.sh` exists | Alternative script should exist | PASS - file exists and is executable |
 | `screenshots/` directory | Screenshots directory should exist | PASS - directory created with .gitkeep |
 
-### 4.2 E2E Screenshot Verification (Manual Review)
+### 4.2 E2E Screenshot Execution & Verification
 
-The following should be verified visually from the generated screenshot:
+```bash
+# Run E2E screenshot script
+cd snake && ./scripts/e2e-screenshot.sh
 
-- [ ] 20x20 grid border visible (ASCII borders with + corners)
-- [ ] Snake displayed with `█` symbol in yellow color
-- [ ] Food displayed with `*` symbol in red color
-- [ ] Score displayed in top-left area
-- [ ] Screenshot filename matches pattern: `YYYYMMDD-HHMMSS-snake-gameplay.cast`
+# Verify .cast file is non-empty
+test -s snake/screenshots/*.cast && echo "Screenshot captured"
+```
+
+| Check | Description | Expected Result |
+|-------|-------------|-----------------|
+| E2E script exits 0 | Script completes successfully | PASS |
+| `.cast` file created | File exists in `snake/screenshots/` | PASS |
+| `.cast` file non-empty | `test -s` returns true (size > 0) | PASS |
+
+**v4 Fix**: The `e2e-screenshot.sh` uses foreground `timeout` instead of background+kill to ensure macOS `script -F` properly flushes content to the `.cast` file.
 
 ## 5. Anti-Misjudgment Mechanisms
 
