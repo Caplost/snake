@@ -12,9 +12,9 @@
 | `go vet ./...` | ✅ PASS | No warnings |
 | `go test -timeout 5m -race ./...` | ✅ PASS | 3/3 packages (all cached) |
 | E2E screenshot script | ✅ PASS | `e2e-screenshot.sh` exits 0, produces valid .cast |
-| `.cast` file generated | ✅ PASS | `20260417-190539-snake-gameplay.cast` (1147 bytes) |
+| `.cast` file generated | ✅ PASS | `20260417-191038-snake-gameplay.cast` (1145 bytes) |
 | `.cast` JSON header | ✅ PASS | Starts with `{` (asciinema v2 format) |
-| `.cast` git-tracked | ✅ PASS | 33 .cast files tracked by git |
+| `.cast` git-tracked | ✅ PASS | 37 .cast files tracked by git, new file staged |
 
 ## Detailed Results
 
@@ -31,28 +31,27 @@ Race detection: `go test -race ./...` — **PASS** (no data races found)
 ### E2E Screenshot Execution
 
 ```
-$ cd snake && ./scripts/e2e-screenshot.sh
-Recording snake game session to .../snake/screenshots/20260417-190539-snake-gameplay.cast
+$ ./scripts/e2e-screenshot.sh
+Recording snake game session to .../snake/screenshots/20260417-191038-snake-gameplay.cast
 Recording for 5 seconds (or until game exits)...
 ::: TTY not available, recording in headless mode
 ::: asciinema session started
-::: Recording to .../snake/screenshots/20260417-190539-snake-gameplay.cast
+::: Recording to .../snake/screenshots/20260417-191038-snake-gameplay.cast
 ::: asciinema session ended
-SUCCESS: Recording saved to .../20260417-190539-snake-gameplay.cast (1147 bytes, asciinema format)
+SUCCESS: Recording saved to .../20260417-191038-snake-gameplay.cast (1145 bytes, asciinema format)
 Exit code: 0
 ```
 
 ### Git Tracking
 
 ```
-$ git ls-files snake/screenshots/*.cast
-snake/screenshots/20260417-140555-snake-gameplay.cast
-snake/screenshots/20260417-141140-snake-gameplay.cast
-... (33 files total including latest)
-snake/screenshots/20260417-190539-snake-gameplay.cast
+$ git ls-files screenshots/*.cast | wc -l
+37
+$ git ls-files screenshots/20260417-191038-snake-gameplay.cast
+screenshots/20260417-191038-snake-gameplay.cast
 ```
 
-All 33 .cast files are properly tracked by git.
+All 37 .cast files are properly tracked by git (new file staged).
 
 ## Anti-Misjudgment Mechanisms Verified
 
@@ -60,9 +59,9 @@ All 33 .cast files are properly tracked by git.
 |-----------|--------|
 | `-timeout 5m` explicit timeout | ✅ Verified |
 | `-race` data race detection | ✅ Verified (0 races) |
-| `|| true` on asciinema timeout | ✅ In script |
+| `\|\| true` on asciinema timeout | ✅ In script |
 | `.cast` JSON header validation | ✅ Verified (`head -c 1` returns `{`) |
-| Git tracking of .cast files | ✅ Verified (33 files tracked) |
+| Git tracking of .cast files | ✅ Verified (37 files tracked) |
 
 ## Build & Static Analysis
 
@@ -76,7 +75,7 @@ go test -race    → PASS (no data races)
 
 Latest screenshot saved to:
 ```
-.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/screenshots-v5/20260417-190539-snake-gameplay.cast
+.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/screenshots-v5/20260417-191038-snake-gameplay.cast
 ```
 
 ## Conclusion
