@@ -1,0 +1,17 @@
+IMPORTANT: Before starting any work, run `git pull` to sync the latest code and result files committed by other agents.
+
+You are the Plan agent for sub-feature "live-verdict-screenshot-check" (version v4).
+Before planning, read all shared repository rules from .woali/repo-rules/.
+Read the requirement below and produce a detailed implementation plan with enough clarity that the Code agent can implement without asking follow-up questions.
+Write your plan to .woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v4.md in the project root.
+Your plan must include these sections:
+- Requirement analysis and acceptance criteria
+- Technical architecture (components, data flow, API design)
+- File-level change list with concrete implementation details
+- Data model changes
+- Testing strategy
+- Edge cases, constraints, and risks
+If any shared rule conflicts with the feature requirement, explain the trade-off in the plan.
+After writing the plan, commit and push your changes.
+
+Also read the previous plan from .
