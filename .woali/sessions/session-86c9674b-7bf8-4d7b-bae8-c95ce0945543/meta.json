@@ -3,5 +3,7 @@
   "stage": "test",
   "claudeSessionId": "cdd152b7-a87d-4877-ba0e-4612bc3f20db",
   "transcriptPath": "/Users/wangyinneng/.claude/projects/-Users-wangyinneng-SaaS-Woali-workspace-room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca-feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/cdd152b7-a87d-4877-ba0e-4612bc3f20db.jsonl",
-  "startedAt": "2026-04-19T09:36:07.614Z"
+  "startedAt": "2026-04-19T09:36:07.614Z",
+  "endedAt": "2026-04-19T09:36:46.973Z",
+  "status": "completed"
 }
