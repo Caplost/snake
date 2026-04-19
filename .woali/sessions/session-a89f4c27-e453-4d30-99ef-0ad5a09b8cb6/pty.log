@@ -1,0 +1,1083 @@
+No conversation found with session ID: 756672d2-c30a-420a-8bb4-8129b3e905c7
+[?1006l[?1003l[?1002l[?1000l[>4m[<u[?1004l[?2004l[?25h[?25hIMPORTANT: Before starting any work, run `git pull` to sync the latest code and result files committed by other agents.
+
+You are the Plan agent for sub-feature "贪吃蛇命令游戏开发" (version v6).
+Before planning, read all shared repository rules from .woali/repo-rules/.
+Read the requirement below and produce a detailed implementation plan with enough clarity that the Code agent can implement without asking follow-up questions.
+Write your plan to .woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v6.md in the project root.
+Your plan must include these sections:
+- Requirement analysis and acceptance criteria
+- Technical architecture (components, data flow, API design)
+- File-level change list with concrete implementation details
+- Data model changes
+- Testing strategy
+- Edge cases, constraints, and risks
+If any shared rule conflicts with the feature requirement, explain the trade-off in the plan.
+After writing the plan, commit and push your changes.
+
+Also read the previous plan from .wo[2026-04-17T09:05:52.794Z] >>> User
+  IMPORTANT: Before starting any work, run `git pull` to sync the latest code and result files committed by other agents.
+  
+  You are the Plan agent for sub-feature "贪吃蛇命令游戏开发" (version v6).
+  Before planning, read all shared repository rules from .woali/repo-rules/.
+  Read the requirement below and produce a detailed implementation plan with enough clarity that the Code agent can implement without asking follow-up questions.
+  Write your plan to .woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v6.md in the project root.
+  Your plan must include these sections:
+  - Requirement analysis and acceptance criteria
+  - Technical architecture (components, data flow, API design)
+  - File-level change list with concrete implementation details
+  - Data model changes
+  - Testing strategy
+  - Edge cases, constraints, and risks
+  If any shared rule conflicts with the feature requirement, explain the trade-off in the plan.
+  After writing the plan, commit and push your changes.
+  
+  Also read the previous plan from .woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v5.md and carry forward relevant context.
+  
+  ## Requirement
+  贪吃蛇游戏
+
+[2026-04-17T09:05:59.044Z] <<< Claude (thinking)
+  Let me start by reading the shared repository rules and the previous plan to understand the context.
+
+[2026-04-17T09:05:59.595Z] >>> Tool: Bash (id=call_1a1e648cc58946f28f29ac64)
+  {
+    "command": "git pull 2>&1 | head -20"
+  }
+
+[2026-04-17T09:05:59.926Z] >>> Tool: Glob (id=call_732deeed6ffb46ff88193eab)
+  {
+    "pattern": ".woali/repo-rules/**/*"
+  }
+
+[2026-04-17T09:06:01.299Z] >>> Tool: Read (id=call_bbccc7aa24ea4b478f621368)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v5.md"
+  }
+
+[2026-04-17T09:06:06.286Z] <<< Tool result (id=call_1a1e648cc58946f28f29ac64)
+  Already up to date.
+
+[2026-04-17T09:06:06.420Z] <<< Tool result (id=call_bbccc7aa24ea4b478f621368)
+  1→# 贪吃蛇 CLI 游戏 - 实现计划 v5
+       2→
+       3→## 上下文继承
+       4→
+       5→- **v2**: 原始架构设计 - Go + termbox-go，ASCII 边框，20x20 网格
+       6→- **v3**: 代码审查修复 - 数据竞态（mutex/waitgroup）、rand.Seed 移动到 reset()
+       7→- **v4**: 移除 input goroutine，简化 Run() 为单线程事件循环
+       8→
+       9→## 1. 需求分析与验收标准
+      10→
+      11→### 功能验收标准
+      12→- [x] 20x20 游戏网格，带 ASCII 边框（角 `+`，边 `-` `|`）
+      13→- [x] 蛇用 `█` 表示，**黄色**
+      14→- [x] 食物用 `*` 表示，**红色**
+      15→- [x] 方向键或 WASD 控制蛇移动方向
+      16→- [x] 蛇吃食物后长度+1，分数+10
+      17→- [x] 撞墙或撞自己时游戏结束，显示 "Game Over" 和最终分数
+      18→- [x] 按 R 键重新开始游戏
+      19→- [x] 游戏帧率约 10 FPS（100ms 间隔）
+      20→- [x] 边界和障碍物检测（自身碰撞）
+      21→
+      22→### 当前颜色实现
+      23→
+      24→| 元素 | 颜色 | 已在 Render() 中实现 |
+      25→|------|------|---------------------|
+      26→| 蛇身 | 黄色 (ColorYellow) | ✓ |
+      27→| 食物 | 红色 (ColorRed) | ✓ |
+      28→| 边框 | 白色 (ColorWhite) | ✓ |
+      29→| Game Over 文字 | 黄色 (ColorYellow) | ✓ |
+      30→| 分数文字 | 白色 (ColorWhite) | ✓ |
+      31→
+      32→## 2. 当前代码状态
+      33→
+      34→### 已实现文件
+      35→- `snake/cmd/snake/main.go` - 入口
+      36→- `snake/internal/constants/constants.go` - 常量定义
+      37→- `snake/internal/snake/snake.go` - 蛇逻辑
+      38→- `snake/internal/snake/snake_test.go` - 测试
+      39→- `snake/internal/food/food.go` - 食物逻辑
+      40→- `snake/internal/food/food_test.go` - 测试
+      41→- `snake/internal/game/game.go` - 游戏主循环
+      42→- `snake/internal/game/game_test.go` - 测试
+      43→- `snake/go.mod` - 模块定义
+      44→
+      45→## 3. 验证清单
+      46→
+      47→```bash
+      48→cd /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/snake
+      49→
+      50→# 构建
+      51→go build ./...
+      52→
+      53→# 竞态检测
+      54→go test -race ./... -v
+      55→
+      56→# 代码检查
+      57→go vet ./...
+      58→```
+      59→
+      60→### 手动测试检查项
+      61→- [ ] 蛇身显示为**黄色**
+      62→- [ ] 食物显示为**红色**
+      63→- [ ] 边框显示为**白色**
+      64→- [ ] Game Over 文字显示为**黄色**
+      65→- [ ] 方向键/WASD 控制正常
+      66→- [ ] 吃食物加分 (+10)
+      67→- [ ] 撞墙/撞自己游戏结束
+      68→- [ ] R 键重开正常
+      69→
+      70→## 4. 依赖
+      71→
+      72→| 依赖 | 版本 | 用途 |
+      73→|------|------|------|
+      74→| Go | 1.21+ | 语言 |
+      75→| termbox-go | latest | 终端 UI + 颜色支持 |
+      76→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-17T09:06:06.492Z] <<< Tool result (id=call_732deeed6ffb46ff88193eab)
+  No files found
+
+[2026-04-17T09:06:10.413Z] <<< Claude (thinking)
+  Let me check the repo-rules directory and also read any existing code to understand the current state.
+
+[2026-04-17T09:06:10.682Z] >>> Tool: Glob (id=call_a5d5e79a4e0b4da2871df37a)
+  {
+    "pattern": ".woali/**/*"
+  }
+
+[2026-04-17T09:06:10.713Z] >>> Tool: Glob (id=call_47ca056d30424eef965f9dbc)
+  {
+    "pattern": "snake/**/*"
+  }
+
+[2026-04-17T09:06:10.834Z] <<< Tool result (id=call_47ca056d30424eef965f9dbc)
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/cmd/snake/main.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/go.mod
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/go.sum
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/constants/constants.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/food/food.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/food/food_test.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/game/game.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/game/game_test.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/snake/snake.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/snake/snake_test.go
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/.gitkeep
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/scripts/asciinema.sh
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-140555-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-141140-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-141228-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-141759-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-141857-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-142206-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-142235-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-142237-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/snake
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-142619-typescript
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-142619-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-142702-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-142750-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/scripts/e2e-screenshot.sh
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-142809-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-143412-typescript
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-143412-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-143520-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-143538-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-144153-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-144158-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-144259-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-144408-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-144631-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-144714-snake-gameplay.cast
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/screenshots/20260417-144806-snake-gameplay.cast
+
+[2026-04-17T09:06:10.834Z] <<< Tool result (id=call_a5d5e79a4e0b4da2871df37a)
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/code-v1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/code-v2.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/code-v3.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/code-v4.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/code-v5.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v2.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v3.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v4.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v5.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/review-v1-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/review-v2-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/review-v3-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/review-v4-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-spec-v1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-spec-v2.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-spec-v3.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-spec-v4.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-spec-v5.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-v2-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-v3-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-v4-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-b5fb7d98-111b-4c1d-ad57-5a904d2af326/plan-v1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-v5-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/plan-v1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/code-v1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/test-spec-v1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-89b990d2-cdb8-489b-97fe-7cdd01fe5e97/test-v1-1.md
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-c36d7d30-0c35-4e81-8a75-c6109c17e889/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-c36d7d30-0c35-4e81-8a75-c6109c17e889/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-8afb948b-4e41-4343-92e9-42b6aabd0aae/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-8afb948b-4e41-4343-92e9-42b6aabd0aae/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-6078faf5-0774-4e0b-ba79-5022bca5d57e/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-6078faf5-0774-4e0b-ba79-5022bca5d57e/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-c619605a-ad21-40a9-8bf5-086514b040bd/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-c619605a-ad21-40a9-8bf5-086514b040bd/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-0b530e4e-1a4e-4990-b947-9789dff14548/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-0b530e4e-1a4e-4990-b947-9789dff14548/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-d8833e1f-4c94-4569-b6ee-51f6fca03091/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-d8833e1f-4c94-4569-b6ee-51f6fca03091/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-89b558fa-8a8c-4576-8a38-9c83459e537a/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-89b558fa-8a8c-4576-8a38-9c83459e537a/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-619abc34-a711-4e75-b25b-1650e0c721e5/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-619abc34-a711-4e75-b25b-1650e0c721e5/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-3b06bfaa-781d-4cc7-b1ad-7257bfaf582f/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-3b06bfaa-781d-4cc7-b1ad-7257bfaf582f/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-614fab07-3a53-4b38-9ebd-7dffe9987041/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-614fab07-3a53-4b38-9ebd-7dffe9987041/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-7a5dc389-0a23-4808-9c67-7364588972f5/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-7a5dc389-0a23-4808-9c67-7364588972f5/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-358d663d-7643-4278-8229-6b0878cfaebb/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-358d663d-7643-4278-8229-6b0878cfaebb/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-8dcea186-a364-4b4c-aba0-a0d0f582f35a/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-8dcea186-a364-4b4c-aba0-a0d0f582f35a/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-919726a7-df18-41fa-b973-0a2d619447c0/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-919726a7-df18-41fa-b973-0a2d619447c0/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-c8fdc803-a746-4107-8f66-bc2b5b78e896/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-c8fdc803-a746-4107-8f66-bc2b5b78e896/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-b1650dc0-4cc9-45b9-a3fc-fbef469a3012/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-b1650dc0-4cc9-45b9-a3fc-fbef469a3012/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-65746cfb-8c2d-497d-ba3a-783b599bc1a6/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-65746cfb-8c2d-497d-ba3a-783b599bc1a6/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-aa8aee5b-acc9-497d-84b5-822348cb2ef0/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-aa8aee5b-acc9-497d-84b5-822348cb2ef0/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-cf9dad8e-7a65-49da-90ee-e0ad9f13e048/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-b0a9056d-dceb-4ead-a804-61e1a04925d7/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-b0a9056d-dceb-4ead-a804-61e1a04925d7/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-e49be031-fd95-4dd9-9041-a73b67f5b673/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-e49be031-fd95-4dd9-9041-a73b67f5b673/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-fb4eaccb-3b54-45fb-9d9b-a0d434bf1b5d/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-fb4eaccb-3b54-45fb-9d9b-a0d434bf1b5d/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-ab21fa18-b751-4c2f-b35b-089b0a7156ea/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-ab21fa18-b751-4c2f-b35b-089b0a7156ea/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-c71d4e84-e179-4c8e-a319-46d507e4d250/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-c71d4e84-e179-4c8e-a319-46d507e4d250/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-5e703335-a225-4c0f-ad18-8f1bb5b42a0f/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-5e703335-a225-4c0f-ad18-8f1bb5b42a0f/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-65669ffe-33ec-4c5a-8561-042ba6f0f65e/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-65669ffe-33ec-4c5a-8561-042ba6f0f65e/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-2309a933-3d55-4ac0-b520-248d034060fc/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-2309a933-3d55-4ac0-b520-248d034060fc/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-3d3fac7c-225e-4424-91fe-401016f2c5ae/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-3d3fac7c-225e-4424-91fe-401016f2c5ae/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-736fc2b9-68f4-4704-9532-4da5835510fc/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-736fc2b9-68f4-4704-9532-4da5835510fc/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-f4092541-2e8e-4696-bd30-47cf7c66b5e8/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-f4092541-2e8e-4696-bd30-47cf7c66b5e8/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-838410ee-c18d-4fcb-8df5-9ee6106592fa/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-838410ee-c18d-4fcb-8df5-9ee6106592fa/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-eac0a8da-8267-4b6e-8f3a-6975dbf00382/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-eac0a8da-8267-4b6e-8f3a-6975dbf00382/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-28a71540-0b1a-4d39-a79a-ec08012ccea9/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-28a71540-0b1a-4d39-a79a-ec08012ccea9/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-a4ed44b5-ccde-4fb4-a06f-187cbc461e6e/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-a4ed44b5-ccde-4fb4-a06f-187cbc461e6e/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-6257b412-4c2f-4cd3-9d88-d8a1c12a5eeb/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-6257b412-4c2f-4cd3-9d88-d8a1c12a5eeb/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-798b1029-40f7-480c-aa4d-3a2134237447/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-798b1029-40f7-480c-aa4d-3a2134237447/meta.json
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-2f2482c5-cc7a-4ae6-9c51-3de9a90cd3f2/pty.log
+  /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/sessions/session-2f2482c5-cc7a-4ae6-9c51-3de9a90cd3f2/meta.json
+  (Results are truncated. Consider using a more specific path or pattern.)
+
+[2026-04-17T09:06:15.005Z] <<< Claude (thinking)
+  Now let me read the current code files to understand the existing implementation, and also the most recent review to understand what improvements were made.
+
+[2026-04-17T09:06:15.203Z] <<< Claude
+  Let me read the existing code and the most recent review to understand current state.
+
+[2026-04-17T09:06:16.533Z] >>> Tool: Read (id=call_259f051c23f2458ea0127702)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/game/game.go"
+  }
+
+[2026-04-17T09:06:17.838Z] >>> Tool: Read (id=call_0b36acc47c3e441589eb7480)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/review-v4-1.md"
+  }
+
+[2026-04-17T09:06:19.009Z] >>> Tool: Read (id=call_918ee7cb57b5415d83124332)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-v5-1.md"
+  }
+
+[2026-04-17T09:06:19.150Z] <<< Tool result (id=call_918ee7cb57b5415d83124332)
+  1→# v5 Test Report - 贪吃蛇命令游戏
+       2→
+       3→**Test Agent**: #1 (of 1)
+       4→**Date**: 2026-04-15
+       5→**Branch**: feature/sub-feature
+       6→
+       7→---
+       8→
+       9→## Summary
+      10→
+      11→| Category | Result | Details |
+      12→|----------|--------|---------|
+      13→| Build | ✅ PASS | `go build ./...` successful |
+      14→| go vet | ✅ PASS | No issues |
+      15→| Unit Tests | ✅ PASS | 12/12 tests passing |
+      16→| Race Detection | ✅ PASS | `go test -race ./...` - no races detected |
+      17→| Color Implementation | ✅ PASS | All 5 colors confirmed in Render() |
+      18→
+      19→**Note**: Previous test runs failed due to "session stale after 90s/112s/126s/142s/..." — test infrastructure timeouts, NOT code issues. This retest confirms all tests pass.
+      20→
+      21→---
+      22→
+      23→## Build
+      24→
+      25→```
+      26→$ cd snake && go build ./...
+      27→# No output = success
+      28→```
+      29→
+      30→## go vet
+      31→
+      32→```
+      33→$ cd snake && go vet ./...
+      34→# No output = success
+      35→```
+      36→
+      37→---
+      38→
+      39→## Unit Tests (12/12 PASS)
+      40→
+      41→### snake/internal/snake (6 tests)
+      42→| Test | Status |
+      43→|------|--------|
+      44→| TestSnakeMove | ✅ PASS |
+      45→| TestSnakeGrow | ✅ PASS |
+      46→| TestSnakeReverseDirection | ✅ PASS |
+      47→| TestSnakeWallCollision | ✅ PASS |
+      48→| TestSnakeOccupies | ✅ PASS |
+      49→| TestSnakeSelfCollision | ✅ PASS |
+      50→
+      51→### snake/internal/food (2 tests)
+      52→| Test | Status |
+      53→|------|--------|
+      54→| TestFoodGenerateNotOnSnake | ✅ PASS |
+      55→| TestFoodPosition | ✅ PASS |
+      56→
+      57→### snake/internal/game (4 tests)
+      58→| Test | Status |
+      59→|------|--------|
+      60→| TestScoreIncrease | ✅ PASS |
+      61→| TestScoreIncreaseOnEatingFood | ✅ PASS |
+      62→| TestGameOverOnWallCollision | ✅ PASS |
+      63→| TestNewGameInitialization | ✅ PASS |
+      64→
+      65→---
+      66→
+      67→## Race Detection
+      68→
+      69→```
+      70→$ go test -race ./...
+      71→ok  	snake/internal/food   (cached)
+      72→ok  	snake/internal/game   (cached)
+      73→ok  	snake/internal/snake  (cached)
+      74→```
+      75→
+      76→No data races detected.
+      77→
+      78→---
+      79→
+      80→## Color Implementation Verification (v5 Focus)
+      81→
+      82→Source code inspection of `game/game.go` confirms all 5 color assignments:
+      83→
+      84→| Element | Color | Location | Status |
+      85→|---------|-------|----------|--------|
+      86→| 蛇身 (Snake) | `termbox.ColorYellow` | Line 134 | ✅ CONFIRMED |
+      87→| 食物 (Food) | `termbox.ColorRed` | Line 138 | ✅ CONFIRMED |
+      88→| 边框 (Border) | `termbox.ColorWhite` | Lines 117-131 | ✅ CONFIRMED |
+      89→| Game Over 文字 | `termbox.ColorYellow` | Line 143 | ✅ CONFIRMED |
+      90→| 分数文字 (Score) | `termbox.ColorWhite` | Line 149 | ✅ CONFIRMED |
+      91→
+      92→---
+      93→
+      94→## Manual Test Checklist
+      95→
+      96→Per plan-v5.md verification checklist:
+      97→
+      98→- [x] 蛇身显示为**黄色** — ✅ Confirmed in Render() at line 134
+      99→- [x] 食物显示为**红色** — ✅ Confirmed in Render() at line 138
+     100→- [x] 边框显示为**白色** — ✅ Confirmed in Render() at lines 117-131
+     101→- [x] Game Over 文字显示为**黄色** — ✅ Confirmed in Render() at line 143
+     102→- [ ] 方向键/WASD 控制正常 — ⬜ Manual test required (TUI)
+     103→- [ ] 吃食物加分 (+10) — ⬜ Manual test required (TUI)
+     104→- [ ] 撞墙/撞自己游戏结束 — ⬜ Manual test required (TUI)
+     105→- [ ] R 键重开正常 — ⬜ Manual test required (TUI)
+     106→
+     107→---
+     108→
+     109→## Conclusion
+     110→
+     111→All automated tests pass. The v5 implementation:
+     112→1. Builds without errors
+     113→2. Passes `go vet` checks
+     114→3. Passes all unit tests (12/12)
+     115→4. Passes race detection tests
+     116→5. Confirms all 5 color implementations in `Render()` function
+     117→
+     118→**VERDICT: PASSED — all tests pass, zero failures**
+     119→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-17T09:06:19.152Z] <<< Tool result (id=call_259f051c23f2458ea0127702)
+  1→package game
+       2→
+       3→import (
+       4→	"fmt"
+       5→	"math/rand"
+       6→	"sync"
+       7→	"time"
+       8→
+       9→	"snake/internal/constants"
+      10→	"snake/internal/food"
+      11→	"snake/internal/snake"
+      12→
+      13→	"github.com/nsf/termbox-go"
+      14→)
+      15→
+      16→type Game struct {
+      17→	score    int
+      18→	gameOver bool
+      19→	snake    *snake.Snake
+      20→	food     *food.Food
+      21→	mu       sync.Mutex
+      22→}
+      23→
+      24→func New() *Game {
+      25→	s := snake.New(constants.GridSize/2, constants.GridSize/2)
+      26→	f := food.New(0, 0)
+      27→	f.Generate(constants.GridSize, s)
+      28→	return &Game{
+      29→		snake: s,
+      30→		food:  f,
+      31→	}
+      32→}
+      33→
+      34→func (g *Game) Score() int {
+      35→	return g.score
+      36→}
+      37→
+      38→func (g *Game) GameOver() bool {
+      39→	g.mu.Lock()
+      40→	defer g.mu.Unlock()
+      41→	return g.gameOver
+      42→}
+      43→
+      44→func (g *Game) setGameOver(val bool) {
+      45→	g.mu.Lock()
+      46→	g.gameOver = val
+      47→	g.mu.Unlock()
+      48→}
+      49→
+      50→func (g *Game) handleKeyEvent(ev termbox.Event) {
+      51→	if ev.Type != termbox.EventKey {
+      52→		return
+      53→	}
+      54→	switch ev.Key {
+      55→	case termbox.KeyArrowUp:
+      56→		g.trySetDirection(snake.Point{X: 0, Y: -1})
+      57→	case termbox.KeyArrowDown:
+      58→		g.trySetDirection(snake.Point{X: 0, Y: 1})
+      59→	case termbox.KeyArrowLeft:
+      60→		g.trySetDirection(snake.Point{X: -1, Y: 0})
+      61→	case termbox.KeyArrowRight:
+      62→		g.trySetDirection(snake.Point{X: 1, Y: 0})
+      63→	case termbox.KeyCtrlC, termbox.KeyEsc:
+      64→		g.setGameOver(true)
+      65→		return
+      66→	}
+      67→	switch ev.Ch {
+      68→	case 'w', 'W':
+      69→		g.trySetDirection(snake.Point{X: 0, Y: -1})
+      70→	case 's', 'S':
+      71→		g.trySetDirection(snake.Point{X: 0, Y: 1})
+      72→	case 'a', 'A':
+      73→		g.trySetDirection(snake.Point{X: -1, Y: 0})
+      74→	case 'd', 'D':
+      75→		g.trySetDirection(snake.Point{X: 1, Y: 0})
+      76→	case 'r', 'R':
+      77→		if g.GameOver() {
+      78→			g.reset()
+      79→		}
+      80→	}
+      81→}
+      82→
+      83→func (g *Game) trySetDirection(d snake.Point) {
+      84→	g.mu.Lock()
+      85→	defer g.mu.Unlock()
+      86→	if g.snake.CheckReverseDirection(d) {
+      87→		return
+      88→	}
+      89→	g.snake.SetDirection(d)
+      90→}
+      91→
+      92→func (g *Game) Update() {
+      93→	if g.GameOver() {
+      94→		return
+      95→	}
+      96→
+      97→	if g.snake.CheckWallCollision(constants.GridSize) || g.snake.CheckSelfCollision() {
+      98→		g.setGameOver(true)
+      99→		return
+     100→	}
+     101→
+     102→	head := g.snake.Head()
+     103→	foodPos := g.food.Position()
+     104→	if head.X == foodPos.X && head.Y == foodPos.Y {
+     105→		g.snake.Grow()
+     106→		g.score += 10
+     107→		g.food.Generate(constants.GridSize, g.snake)
+     108→	} else {
+     109→		g.snake.Move()
+     110→	}
+     111→}
+     112→
+     113→func (g *Game) Render() {
+     114→	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+     115→
+     116→	// Draw corners
+     117→	termbox.SetCell(0, 0, constants.CornerSymbol, termbox.ColorWhite, termbox.ColorDefault)
+     118→	termbox.SetCell(constants.GridSize, 0, constants.CornerSymbol, termbox.ColorWhite, termbox.ColorDefault)
+     119→	termbox.SetCell(0, constants.GridSize, constants.CornerSymbol, termbox.ColorWhite, termbox.ColorDefault)
+     120→	termbox.SetCell(constants.GridSize, constants.GridSize, constants.CornerSymbol, termbox.ColorWhite, termbox.ColorDefault)
+     121→
+     122→	// Draw horizontal borders (top and bottom)
+     123→	for x := 1; x < constants.GridSize; x++ {
+     124→		termbox.SetCell(x, 0, constants.HorizontalBorder, termbox.ColorWhite, termbox.ColorDefault)
+     125→		termbox.SetCell(x, constants.GridSize, constants.HorizontalBorder, termbox.ColorWhite, termbox.ColorDefault)
+     126→	}
+     127→	// Draw vertical borders (left and right)
+     128→	for y := 1; y < constants.GridSize; y++ {
+     129→		termbox.SetCell(0, y, constants.VerticalBorder, termbox.ColorWhite, termbox.ColorDefault)
+     130→		termbox.SetCell(constants.GridSize, y, constants.VerticalBorder, termbox.ColorWhite, termbox.ColorDefault)
+     131→	}
+     132→
+     133→	for _, p := range g.snake.Body() {
+     134→		termbox.SetCell(p.X+1, p.Y+1, constants.SnakeSymbol, termbox.ColorYellow, termbox.ColorDefault)
+     135→	}
+     136→
+     137→	foodPos := g.food.Position()
+     138→	termbox.SetCell(foodPos.X+1, foodPos.Y+1, constants.FoodSymbol, termbox.ColorRed, termbox.ColorDefault)
+     139→
+     140→	if g.GameOver() {
+     141→		msg := fmt.Sprintf("Game Over! Score: %d. Press R to restart", g.score)
+     142→		for i, c := range msg {
+     143→			termbox.SetCell(constants.GridSize/2-10+i, constants.GridSize/2, c, termbox.ColorYellow, termbox.ColorDefault)
+     144→		}
+     145→	}
+     146→
+     147→	scoreMsg := fmt.Sprintf("Score: %d", g.score)
+     148→	for i, c := range scoreMsg {
+     149→		termbox.SetCell(2+i, 0, c, termbox.ColorWhite, termbox.ColorDefault)
+     150→	}
+     151→
+     152→	termbox.Flush()
+     153→}
+     154→
+     155→func (g *Game) reset() {
+     156→	rand.Seed(time.Now().UnixNano())
+     157→	g.mu.Lock()
+     158→	g.snake = snake.New(constants.GridSize/2, constants.GridSize/2)
+     159→	g.food.Generate(constants.GridSize, g.snake)
+     160→	g.score = 0
+     161→	g.gameOver = false
+     162→	g.mu.Unlock()
+     163→}
+     164→
+     165→func (g *Game) Run() {
+     166→	if err := termbox.Init(); err != nil {
+     167→		panic(err)
+     168→	}
+     169→	defer termbox.Close()
+     170→	termbox.SetInputMode(termbox.InputEsc)
+     171→	g.reset()
+     172→
+     173→	ticker := time.NewTicker(time.Duration(constants.TickMs) * time.Millisecond)
+     174→	defer ticker.Stop()
+     175→
+     176→	for {
+     177→		g.Render()
+     178→
+     179→		// Event-driven input (blocking)
+     180→		ev := termbox.PollEvent()
+     181→		g.handleKeyEvent(ev)
+     182→
+     183→		// Check for exit
+     184→		if g.GameOver() {
+     185→			// Wait for user to press R to restart or Esc/Ctrl+C to exit
+     186→			for {
+     187→				ev := termbox.PollEvent()
+     188→				if ev.Type == termbox.EventKey {
+     189→					if ev.Ch == 'r' || ev.Ch == 'R' {
+     190→						g.reset()
+     191→						break
+     192→					}
+     193→					if ev.Key == termbox.KeyCtrlC || ev.Key == termbox.KeyEsc {
+     194→						return
+     195→					}
+     196→				}
+     197→			}
+     198→		}
+     199→
+     200→		<-ticker.C
+     201→		g.Update()
+     202→	}
+     203→}
+     204→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-17T09:06:19.150Z] <<< Tool result (id=call_0b36acc47c3e441589eb7480)
+  1→# v4 Code Review - 贪吃蛇命令游戏
+       2→
+       3→**Reviewer**: Agent #1
+       4→**Date**: 2026-03-28
+       5→**Branch**: feature/sub-feature
+       6→
+       7→---
+       8→
+       9→## Overall Assessment
+      10→
+      11→**VERDICT**: REQUEST_CHANGES
+      12→
+      13→The v4 implementation successfully fixes the CRITICAL input goroutine restart bug and converts polling input to event-driven. The core architectural change is sound — removing the background goroutine eliminates the goroutine lifecycle management problem entirely. However, **critical test coverage gaps** exist for the most important game logic paths.
+      14→
+      15→---
+      16→
+      17→## Test Results Summary
+      18→
+      19→| Check | Result |
+      20→|-------|--------|
+      21→| `go build ./...` | ✅ PASS |
+      22→| `go vet ./...` | ✅ PASS |
+      23→| `go test -race ./...` | ✅ PASS (no races) |
+      24→| Unit tests | ✅ 12/12 PASS |
+      25→| Coverage (snake) | ✅ 87.0% |
+      26→| Coverage (food) | ✅ 100.0% |
+      27→| Coverage (game) | ⚠️ **15.6%** — too low |
+      28→
+      29→---
+      30→
+      31→## Issues Found
+      32→
+      33→### 1. [HIGH] `reset()` function has zero test coverage
+      34→
+      35→**File**: `snake/internal/game/game.go:155-163`
+      36→
+      37→`reset()` is a critical function — it reinitializes the entire game state on restart. It is completely untested. If `reset()` has a bug, the game will silently break on restart.
+      38→
+      39→**Missing test cases**:
+      40→- `reset()` after game over restores initial snake position
+      41→- `reset()` clears score to 0
+      42→- `reset()` clears gameOver flag
+      43→- `reset()` generates new food not overlapping snake
+      44→- `reset()` is idempotent (calling twice is safe)
+      45→
+      46→---
+      47→
+      48→### 2. [HIGH] `handleKeyEvent()` has zero test coverage
+      49→
+      50→**File**: `snake/internal/game/game.go:50-81`
+      51→
+      52→`handleKeyEvent()` handles ALL user input: direction keys, WASD, restart (R), and exit (Esc/Ctrl+C). This is the most security-and-correctness-critical path in the game, yet it is completely untested via unit tests.
+      53→
+      54→**Missing test cases**:
+      55→- R key calls `reset()` when game over (game.go:76-79)
+      56→- R key does nothing when game is NOT over
+      57→- Esc/Ctrl+C sets `gameOver = true`
+      58→- Arrow keys call `trySetDirection()` with correct direction
+      59→- WASD keys call `trySetDirection()` with correct direction
+      60→- Non-key events are ignored (ev.Type != termbox.EventKey)
+      61→
+      62→---
+      63→
+      64→### 3. [MEDIUM] `trySetDirection()` has no direct test coverage
+      65→
+      66→**File**: `snake/internal/game/game.go:83-90`
+      67→
+      68→While indirectly covered by snake's `TestSnakeReverseDirection`, the `Game`-level `trySetDirection()` (which wraps with mutex) is not tested. Specifically:
+      69→- Mutex protection is not verified
+      70→- Integration with `CheckReverseDirection` at Game level not tested
+      71→
+      72→---
+      73→
+      74→### 4. [MEDIUM] Manual test checklist completely unchecked
+      75→
+      76→**File**: `.woali/fp-.../test-v4-1.md:96-111`
+      77→
+      78→All 12 manual test checklist items are unchecked. The test report correctly identifies that termbox-go is not browser-testable, but this makes the missing unit tests for `handleKeyEvent` and `reset` even more critical.
+      79→
+      80→---
+      81→
+      82→### 5. [LOW] `Render()` accesses game state without mutex lock
+      83→
+      84→**File**: `snake/internal/game/game.go:113-153`
+      85→
+      86→`Render()` reads `g.snake.Body()` and `g.food.Position()` without holding `g.mu`, while `Update()` modifies `g.snake` and `g.food` with the lock held. In the current single-threaded event loop this causes no visible bug, but it violates the locking discipline and could become a race condition if the architecture changes.
+      87→
+      88→**Note**: `Render()` does call `g.GameOver()` which locks correctly, but the snake/food reads are unprotected.
+      89→
+      90→---
+      91→
+      92→## What Was Done Well
+      93→
+      94→1. **Architectural fix is correct**: Removing the input goroutine eliminates the "goroutine doesn't restart on reset" bug entirely — a cleaner solution than trying to manage goroutine lifecycle.
+      95→
+      96→2. **Event-driven input**: Using `termbox.PollEvent()` blocking is more efficient than 16ms polling loop.
+      97→
+      98→3. **Mutex protection preserved**: `trySetDirection()`, `setGameOver()`, and `GameOver()` correctly use mutex — no data races detected.
+      99→
+     100→4. **rand.Seed in reset()**: Correctly moved from `New()` to `reset()` so each game starts with a different random seed.
+     101→
+     102→5. **Clean separation of concerns**: `handleKeyEvent()` receives event as parameter (testable interface), unlike the old `HandleInput()` which called `PollEvent()` internally.
+     103→
+     104→---
+     105→
+     106→## Required Changes Before Approval
+     107→
+     108→1. **Add unit tests for `reset()`** — at minimum 3 tests covering: score reset, gameOver flag reset, snake re-initialization.
+     109→
+     110→2. **Add unit tests for `handleKeyEvent()`** — at minimum test the R-key restart path and Esc/Ctrl+C exit path with mocked termbox events.
+     111→
+     112→3. **Increase game package coverage** from 15.6% to at least 40% — current coverage is too low for a package containing critical game logic.
+     113→
+     114→---
+     115→
+     116→## Suggested Test Cases to Add
+     117→
+     118→```go
+     119→// In game_test.go
+     120→
+     121→func TestResetClearsScore(t *testing.T) { ... }
+     122→func TestResetClearsGameOver(t *testing.T) { ... }
+     123→func TestResetReinitializesSnake(t *testing.T) { ... }
+     124→
+     125→func TestHandleKeyEvent_RestartsGame(t *testing.T) {
+     126→    ev := termbox.Event{Type: termbox.EventKey, Ch: 'r'}
+     127→    // setup game in gameOver state
+     128→    g.handleKeyEvent(ev)
+     129→    // verify reset was called
+     130→}
+     131→
+     132→func TestHandleKeyEvent_ExitOnEsc(t *testing.T) {
+     133→    ev := termbox.Event{Type: termbox.EventKey, Key: termbox.KeyEsc}
+     134→    g.handleKeyEvent(ev)
+     135→    if !g.GameOver() { t.Error("Esc should trigger game over") }
+     136→}
+     137→
+     138→func TestHandleKeyEvent_IgnoresNonKeyEvents(t *testing.T) {
+     139→    ev := termbox.Event{Type: termbox.EventResize}
+     140→    g.handleKeyEvent(ev)
+     141→    // game state should be unchanged
+     142→}
+     143→```
+     144→
+     145→---
+     146→
+     147→## Conclusion
+     148→
+     149→The v4 code is **structurally sound** — the architectural fix for the goroutine bug is correct and well-reasoned. However, the **complete absence of tests for `reset()` and `handleKeyEvent()`** leaves the most critical user journeys (restart, exit, direction input) verified only by manual testing. Given the game cannot be e2e-tested in CI, unit tests for these functions are essential before merge.
+     150→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-17T09:06:26.110Z] <<< Claude (thinking)
+  Now I have a clear picture:
+  
+  **Current State (v5)**:
+  - The game is functionally complete with all features implemented
+  - Build, vet, tests, race detection all pass
+  - But game coverage is only 15.6% (review-v4-1 flagged this)
+  - `handleKeyEvent()` and `reset()` have zero test coverage
+  - `Render()` reads game state without mutex
+  
+  **v6 Plan Goal**: Address the test coverage gaps identified in review-v4-1:
+  1. Add unit tests for `reset()`
+  2. Add unit tests for `handleKeyEvent()`
+  3. Increase game package coverage from 15.6% to at least 40%
+  4. Fix the Render() mutex issue
+  
+  Let me also read the test-spec-v5 to understand the v5 test spec.
+
+[2026-04-17T09:06:28.186Z] >>> Tool: Read (id=call_f3e0bd00e9eb403eb7c8f8c6)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/test-spec-v5.md"
+  }
+
+[2026-04-17T09:06:29.008Z] >>> Tool: Read (id=call_5b29f8d54c024b889e7255e3)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/snake/internal/game/game_test.go"
+  }
+
+[2026-04-17T09:06:29.079Z] <<< Tool result (id=call_5b29f8d54c024b889e7255e3)
+  1→package game
+       2→
+       3→import (
+       4→	"testing"
+       5→
+       6→	"snake/internal/constants"
+       7→	"snake/internal/food"
+       8→	"snake/internal/snake"
+       9→)
+      10→
+      11→func TestScoreIncrease(t *testing.T) {
+      12→	g := &Game{
+      13→		score:    0,
+      14→		gameOver: false,
+      15→		snake:    snake.New(constants.GridSize/2, constants.GridSize/2),
+      16→		food:     food.New(0, 0),
+      17→	}
+      18→
+      19→	if g.score != 0 {
+      20→		t.Errorf("Initial score should be 0, got %d", g.score)
+      21→	}
+      22→}
+      23→
+      24→func TestScoreIncreaseOnEatingFood(t *testing.T) {
+      25→	g := New()
+      26→	initialScore := g.score
+      27→	head := g.snake.Head()
+      28→	g.food = food.New(head.X, head.Y)
+      29→	g.Update()
+      30→	if g.score != initialScore+10 {
+      31→		t.Errorf("Score should increase by 10 when eating food, got %d", g.score)
+      32→	}
+      33→}
+      34→
+      35→func TestGameOverOnWallCollision(t *testing.T) {
+      36→	s := snake.New(0, 0)
+      37→	s.SetDirection(snake.Point{X: -1, Y: 0})
+      38→	s.Move()
+      39→	if !s.CheckWallCollision(constants.GridSize) {
+      40→		t.Error("Snake should be in wall collision state after moving left from x=0")
+      41→	}
+      42→}
+      43→
+      44→func TestNewGameInitialization(t *testing.T) {
+      45→	g := New()
+      46→	if g.score != 0 {
+      47→		t.Errorf("New game score should be 0, got %d", g.score)
+      48→	}
+      49→	if g.gameOver {
+      50→		t.Error("New game should not be game over")
+      51→	}
+      52→	if g.snake == nil {
+      53→		t.Error("Snake should be initialized")
+      54→	}
+      55→	if g.food == nil {
+      56→		t.Error("Food should be initialized")
+      57→	}
+      58→}
+      59→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-17T09:06:29.079Z] <<< Tool result (id=call_f3e0bd00e9eb403eb7c8f8c6)
+  1→# 贪吃蛇 CLI 游戏 - 测试规格 v5
+       2→
+       3→## 测试环境
+       4→
+       5→- Go 1.21+
+       6→- termbox-go (终端 UI 库)
+       7→- macOS/Linux 终端
+       8→
+       9→## 验证命令
+      10→
+      11→```bash
+      12→cd /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/snake
+      13→
+      14→# 构建验证
+      15→go build ./...
+      16→
+      17→# 竞态检测
+      18→go test -race ./... -v
+      19→
+      20→# 代码检查
+      21→go vet ./...
+      22→```
+      23→
+      24→## 单元测试覆盖
+      25→
+      26→### snake 包 (snake_test.go)
+      27→
+      28→| 测试 | 描述 | 预期结果 |
+      29→|------|------|----------|
+      30→| TestSnakeMove | 蛇移动后位置正确 | PASS |
+      31→| TestSnakeGrow | 蛇吃食物后长度+1 | PASS |
+      32→| TestSnakeReverseDirection | 不能反向移动 | PASS |
+      33→| TestSnakeWallCollision | 撞墙检测正确 | PASS |
+      34→| TestSnakeOccupies | 位置占用检测正确 | PASS |
+      35→| TestSnakeSelfCollision | 自身碰撞检测正确 | PASS |
+      36→
+      37→### food 包 (food_test.go)
+      38→
+      39→| 测试 | 描述 | 预期结果 |
+      40→|------|------|----------|
+      41→| TestFoodGenerateNotOnSnake | 食物不生成在蛇身上 | PASS |
+      42→| TestFoodPosition | 食物位置正确返回 | PASS |
+      43→
+      44→### game 包 (game_test.go)
+      45→
+      46→| 测试 | 描述 | 预期结果 |
+      47→|------|------|----------|
+      48→| TestNewGameInitialization | 新游戏初始化正确 | PASS |
+      49→| TestScoreIncrease | 分数递增正确 | PASS |
+      50→| TestScoreIncreaseOnEatingFood | 吃食物后分数+10 | PASS |
+      51→| TestGameOverOnWallCollision | 撞墙游戏结束 | PASS |
+      52→
+      53→## 手动测试检查项
+      54→
+      55→由于 termbox-go 需要真实终端，以下检查项需要手动验证：
+      56→
+      57→### 颜色验证
+      58→- [ ] 蛇身显示为**黄色** (`ColorYellow`)
+      59→- [ ] 食物显示为**红色** (`ColorRed`)
+      60→- [ ] 边框显示为**白色** (`ColorWhite`)
+      61→- [ ] Game Over 文字显示为**黄色** (`ColorYellow`)
+      62→
+      63→### 游戏逻辑验证
+      64→- [ ] 方向键/WASD 控制正常
+      65→- [ ] 吃食物加分 (+10)
+      66→- [ ] 撞墙/撞自己游戏结束
+      67→- [ ] R 键重开正常
+      68→
+      69→### 手动测试步骤
+      70→
+      71→1. 构建并运行游戏：
+      72→   ```bash
+      73→   cd /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/snake
+      74→   go build -o snake ./cmd/snake
+      75→   ./snake
+      76→   ```
+      77→
+      78→2. 验证初始状态：
+      79→   - 20x20 网格，带 ASCII 边框
+      80→   - 蛇（黄色 `█`）在中央
+      81→   - 食物（红色 `*`）随机位置
+      82→
+      83→3. 测试控制：
+      84→   - 按方向键或 WASD 移动蛇
+      85→   - 蛇应朝指定方向移动
+      86→
+      87→4. 测试吃食物：
+      88→   - 引导蛇吃食物 `*`
+      89→   - 分数应增加 10
+      90→   - 蛇身长度应增加 1
+      91→
+      92→5. 测试游戏结束：
+      93→   - 撞墙或撞自己
+      94→   - 应显示 "Game Over! Score: X"
+      95→   - 按 R 键应重新开始
+      96→
+      97→## E2E 测试说明
+      98→
+      99→此项目使用 termbox-go 进行终端渲染，不适合自动化 E2E 测试。所有核心逻辑通过单元测试覆盖。
+     100→
+     101→## 已知限制
+     102→
+     103→- termbox-go 需要真实终端，无法在无头环境测试渲染
+     104→- 手动测试需要交互式终端会话
+     105→
+  
+  <system-reminder>
+  Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+  </system-reminder>
+
+[2026-04-17T09:06:38.563Z] <<< Claude (thinking)
+  Now I understand the full picture:
+  
+  **Current state (v5)**:
+  - Build passes
+  - All 12 unit tests pass
+  - Race detection passes
+  - Color implementation confirmed
+  - BUT: game package coverage is only 15.6%
+  - Missing tests for `reset()` and `handleKeyEvent()` (critical review finding from v4)
+  
+  The user just said "贪吃蛇游戏" - this is the same game. Since the previous v5 plan already has all features implemented and tested, and the only remaining work is to address the test coverage gaps identified in the v4 code review, the v6 plan should focus on:
+  
+  1. **Adding unit tests for `reset()`** - to increase game package coverage
+  
+  
+  2. **Adding unit tests for `handleKeyEvent()`** - the most critical missing tests
+  3. **Fixing the MEDIUM issue with Render() accessing game state without mutex**
+  
+  The game itself is feature-complete. The v6 focus is purely on test coverage improvements. Looking at the review more carefully, the critical issues are the missing tests for `reset()` and `handleKeyEvent()`, the medium priority gap in `trySetDirection()` coverage, and the low severity issue where `Render()` reads game state without holding the mutex.
+  
+  The test report shows all tests passing, so I need to add coverage for these uncovered functions. Since the user simply said "贪吃蛇游戏" with no new requirements, v6 is purely about test improvements. I should write the plan addressing the v4 review findings and then implement the missing tests.
+
+[2026-04-17T09:06:39.719Z] <<< Claude
+  Now I have full context. The game is feature-complete from v5. The v4 code review identified critical test coverage gaps (no tests for `reset()` and `handleKeyEvent()`), and the test report confirmed all 12 existing tests pass but game package coverage is only 15.6%.
+  
+  v6 plan focuses on **test coverage improvements** — adding tests for the uncovered critical paths identified in the v4 review.
+
+[2026-04-17T09:07:13.101Z] >>> Tool: Write (id=call_2bd6a87f2a5141fc80a62795)
+  {
+    "file_path": "/Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v6.md",
+    "content": "# 贪吃蛇 CLI 游戏 - 实现计划 v6\n\n## 上下文继承\n\n- **v2**: 原始架构设计 - Go + termbox-go，ASCII 边框，20x20 网格\n- **v3**: 代码审查修复 - 数据竞态（mutex/waitgroup）、rand.Seed 移动到 reset()\n- **v4**: 移除 input goroutine，简化 Run() 为单线程事件循环；**发现测试覆盖缺口**\n- **v5**: 颜色实现完成，12/12 测试通过，竞态检测通过\n\n## v4 代码审查发现的关键问题（遗留）\n\n| 优先级 | 问题 | 当前状态 |\n|--------|------|----------|\n| HIGH | `reset()` 零测试覆盖 | 未修复 |\n| HIGH | `handleKeyEvent()` 零测试覆盖 | 未修复 |\n| MEDIUM | `trySetDirection()` 无直接测试 | 未修复 |\n| LOW | `Render()` 无 mutex 保护读取 | 未修复 |\n\n**v6 目标**：修复以上 4 个测试覆盖/代码问题，使 game 包测试覆盖率达到 40%+。\n\n---\n\n## 1. 需求分析与验收标准\n\n### 功能（已在 v5 完成，v6 不变更功能）\n\n- [x] 20x20 游戏网格，带 ASCII 边框（角 `+`，边 `-` `|`）\n- [x] 蛇用 `█` 表示，**黄色**\n- [x] 食物用 `*` 表示，**红色**\n- [x] 方向键或 WASD 控制蛇移动方向\n- [x] 蛇吃食物后长度+1，分数+10\n- [x] 撞墙或撞自己时游戏结束，显示 \"Game Over\" 和最终分数\n- [x] 按 R 键重新开始游戏\n- [x] 游戏帧率约 10 FPS（100ms 间隔）\n\n### v6 验收标准（测试驱动）\n\n- [ ] `reset()` 函数有 3+ 个单元测试覆盖\n- [ ] `handleKeyEvent()` 函数有 3+ 个单元测试覆盖\n- [ ] `trySetDirection()` 有直接测试覆盖\n- [ ] `Render()` 读取状态时持有 mutex（或通过其他方式消除数据竞争）\n- [ ] `go test -cover ./...` game 包覆盖率 40%+\n- [ ] 所有测试通过（`go test -race ./...`）\n\n---\n\n## 2. 技术架构\n\n### 现有组件结构（无变化）\n\n```\nsnake/\n├── cmd/snake/main.go          # 入口\n├── internal/\n│   ├── constants/constants.go # 常量\n│   ├── snake/snake.go          # 蛇逻辑\n│   ├── food/food.go            # 食物逻辑\n│   └── game/game.go           # 游戏主循环\n└── go.mod\n```\n\n### `handleKeyEvent` 测试策略\n\n`handleKeyEvent` 依赖 `termbox.Event`，已在 v4 重构为接收参数而非内部调用 `PollEvent()`，因此**可以直接单元测试**。\n\n### `reset()` 测试策略\n\n`reset()` 在 game 内部使用 mutex 保护，可通过构造 game 实例后调用（非导出方法通过反射或包内测试直接访问）。\n\n### `Render()` mutex 问题\n\n`Render()` 在 lines 133-138 读取 `g.snake.Body()` 和 `g.food.Position()` 时未持有 `g.mu`。解决方案：在 `Render()` 开头加读锁 `g.mu.RLock()`，或接受当前单线程事件循环下无实际问题（review 建议修复）。\n\n---\n\n## 3. 文件级变更列表\n\n### `snake/internal/game/game.go`\n\n| 位置 | 变更 | 原因 |\n|------|------|------|\n| `Render()` (line 113) | 添加 `g.mu.RLock()` / `defer g.mu.RUnlock()` | 修复 LOW 优先级数据竞争风险 |\n| `reset()` (line 155) | 无代码变更 | 仅为测试目标 |\n\n### `snake/internal/game/game_test.go`\n\n| 新增测试 | 覆盖目标 |\n|----------|----------|\n| `TestResetClearsScore` | `reset()` 分数清零 |\n| `TestResetClearsGameOver` | `reset()` 游戏结束标志清除 |\n| `TestResetReinitializesSnake` | `reset()` 蛇重新初始化到中心 |\n| `TestResetGeneratesNewFood` | `reset()` 生成不与蛇重叠的食物 |\n| `TestHandleKeyEvent_RestartsGame` | R 键调用 reset() |\n| `TestHandleKeyEvent_ExitOnEsc` | Esc 设置 gameOver=true |\n| `TestHandleKeyEvent_ExitOnCtrlC` | Ctrl+C 设置 gameOver=true |\n| `TestHandleKeyEvent_IgnoresNonKeyEvents` | 非键盘事件被忽略 |\n| `TestHandleKeyEvent_WASDAndArrows` | WASD/方向键调用 trySetDirection |\n| `TestTrySetDirection_BlocksReverse` | trySetDirection 阻止反向 |\n\n**新增测试数量**：10 个（game 包从 4 个测试增加到 14 个）\n\n---\n\n## 4. 数据模型变更\n\n无数据模型变更。\n\n---\n\n## 5. 测试策略\n\n### 覆盖率目标\n\n| 包 | 当前覆盖 | 目标覆盖 |\n|----|----------|----------|\n| snake | 87.0% | 87%+ (不变) |\n| food | 100% | 100% (不变) |\n| game | **15.6%** | **40%+** |\n\n### 新增测试用例详解\n\n#### `TestResetClearsScore`\n```go\nfunc TestResetClearsScore(t *testing.T) {\n    g := New()\n    g.score = 100\n    g.reset()\n    if g.score != 0 {\n        t.Errorf(\"reset() should clear score, got %d\", g.score)\n    }\n}\n```\n\n#### `TestResetClearsGameOver`\n```go\nfunc TestResetClearsGameOver(t *testing.T) {\n    g := New()\n    g.setGameOver(true)\n    g.reset()\n    if g.gameOver {\n        t.Error(\"reset() should clear gameOver flag\")\n    }\n}\n```\n\n#### `TestResetReinitializesSnake`\n```go\nfunc TestResetReinitializesSnake(t *testing.T) {\n    g := New()\n    // Move snake away from center\n    g.snake.Move()\n    g.reset()\n    head := g.snake.Head()\n    expectedX := constants.GridSize / 2\n    if head.X != expectedX || head.Y != expectedX {\n        t.Errorf(\"reset() should reinit snake at center (%d,%d), got (%d,%d)\",\n            expectedX, expectedX, head.X, head.Y)\n    }\n}\n```\n\n#### `TestResetGeneratesNewFood`\n```go\nfunc TestResetGeneratesNewFood(t *testing.T) {\n    g := New()\n    g.reset()\n    snakeBody := g.snake.Body()\n    foodPos := g.food.Position()\n    for _, p := range snakeBody {\n        if p.X == foodPos.X && p.Y == foodPos.Y {\n            t.Error(\"reset() should generate food not overlapping snake\")\n        }\n    }\n}\n```\n\n#### `TestHandleKeyEvent_RestartsGame`\n```go\nfunc TestHandleKeyEvent_RestartsGame(t *testing.T) {\n    g := New()\n    g.setGameOver(true)\n    g.score = 999\n    ev := termbox.Event{Type: termbox.EventKey, Ch: 'r'}\n    g.handleKeyEvent(ev)\n    if g.gameOver {\n        t.Error(\"R key should restart game (clear gameOver)\")\n    }\n    if g.score != 0 {\n        t.Errorf(\"R key should reset score, got %d\", g.score)\n    }\n}\n```\n\n#### `TestHandleKeyEvent_ExitOnEsc`\n```go\nfunc TestHandleKeyEvent_ExitOnEsc(t *testing.T) {\n    g := New()\n    ev := termbox.Event{Type: termbox.EventKey, Key: termbox.KeyEsc}\n    g.handleKeyEvent(ev)\n    if !g.GameOver() {\n        t.Error(\"Esc should trigger game over\")\n    }\n}\n```\n\n#### `TestHandleKeyEvent_ExitOnCtrlC`\n```go\nfunc TestHandleKeyEvent_ExitOnCtrlC(t *testing.T) {\n    g := New()\n    ev := termbox.Event{Type: termbox.EventKey, Key: termbox.KeyCtrlC}\n    g.handleKeyEvent(ev)\n    if !g.GameOver() {\n        t.Error(\"Ctrl+C should trigger game over\")\n    }\n}\n```\n\n#### `TestHandleKeyEvent_IgnoresNonKeyEvents`\n```go\nfunc TestHandleKeyEvent_IgnoresNonKeyEvents(t *testing.T) {\n    g := New()\n    g.score = 123\n    ev := termbox.Event{Type: termbox.EventResize}\n    g.handleKeyEvent(ev)\n    if g.GameOver() || g.score != 123 {\n        t.Error(\"Non-key events should be ignored\")\n    }\n}\n```\n\n#### `TestHandleKeyEvent_WASDAndArrows`\n```go\nfunc TestHandleKeyEvent_WASDAndArrows(t *testing.T) {\n    g := New()\n    tests := []struct {\n        ev       termbox.Event\n        expected snake.Point\n    }{\n        {termbox.Event{Type: termbox.EventKey, Key: termbox.KeyArrowUp}, snake.Point{X: 0, Y: -1}},\n        {termbox.Event{Type: termbox.EventKey, Key: termbox.KeyArrowDown}, snake.Point{X: 0, Y: 1}},\n        {termbox.Event{Type: termbox.EventKey, Key: termbox.KeyArrowLeft}, snake.Point{X: -1, Y: 0}},\n        {termbox.Event{Type: termbox.EventKey, Key: termbox.KeyArrowRight}, snake.Point{X: 1, Y: 0}},\n        {termbox.Event{Type: termbox.EventKey, Ch: 'w'}, snake.Point{X: 0, Y: -1}},\n        {termbox.Event{Type: termbox.EventKey, Ch: 's'}, snake.Point{X: 0, Y: 1}},\n        {termbox.Event{Type: termbox.EventKey, Ch: 'a'}, snake.Point{X: -1, Y: 0}},\n        {termbox.Event{Type: termbox.EventKey, Ch: 'd'}, snake.Point{X: 1, Y: 0}},\n    }\n    for _, tt := range tests {\n        g.handleKeyEvent(tt.ev)\n        dir := g.snake.Direction()\n        if dir != tt.expected {\n            t.Errorf(\"key event should set direction to %v, got %v\", tt.expected, dir)\n        }\n    }\n}\n```\n\n#### `TestTrySetDirection_BlocksReverse`\n```go\nfunc TestTrySetDirection_BlocksReverse(t *testing.T) {\n    g := New()\n    // Current direction is (1,0) - moving right\n    // Try to go left (reverse) - should be blocked\n    g.trySetDirection(snake.Point{X: -1, Y: 0})\n    dir := g.snake.Direction()\n    if dir.X != 1 || dir.Y != 0 {\n        t.Error(\"trySetDirection should block reverse direction\")\n    }\n}\n```\n\n### 验证命令\n\n```bash\ncd /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/snake\n\n# 构建\ngo build ./...\n\n# 运行新测试\ngo test ./internal/game/... -v -run \"TestReset|TestHandleKeyEvent|TestTrySetDirection\"\n\n# 覆盖率检查\ngo test ./... -cover\n\n# 竞态检测\ngo test -race ./...\n```\n\n---\n\n## 6. 边缘情况、约束与风险\n\n### 边缘情况\n\n| 场景 | 处理 |\n|------|------|\n| R 键在游戏未结束时按下 | `handleKeyEvent` 检查 `g.GameOver()` 才调用 reset()，安全 |\n| 快速连续按键 | 单线程事件循环，每帧处理一个事件，无竞态 |\n| reset() 多次调用 | 安全，state 完全重新初始化 |\n| 食物生成在蛇身上 | `food.Generate()` 已处理此情况 |\n\n### 约束\n\n- `termbox-go` 需要真实终端，`Render()` 无法在单元测试中验证视觉效果\n- `Run()` 函数需要终端输入，单元测试不调用 `Run()`\n\n### 风险\n\n- **无新风险**：v6 仅添加测试和极小代码变更（mutex 添加到 Render），不改变游戏逻辑\n"
+  }
+
+[2026-04-17T09:07:13.198Z] <<< Tool result (id=call_2bd6a87f2a5141fc80a62795)
+  File created successfully at: /Users/wangyinneng/SaaS/Woali/workspace/room-ab68f9ee-f954-4ec9-a486-84e0d9d86bca/feature-814b09c0-0b8e-4133-b1bd-250edb0ec936/.woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v6.md
+
+[2026-04-17T09:07:17.361Z] <<< Claude (thinking)
+  Now let me commit and push the plan file.
+
+[2026-04-17T09:07:21.048Z] >>> Tool: Bash (id=call_af2ad20de8ea438eae2d91cb)
+  {
+    "command": "git add .woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v6.md && git commit -m \"$(cat <<'EOF'\ndocs: add plan-v6 for test coverage improvements\n\nCarry forward v2-v5 context:\n- v2: original architecture\n- v3: race condition fixes\n- v4: input goroutine removal, identified test gaps\n- v5: color implementation complete, 12/12 tests pass\n\nv6 focus: fix HIGH-priority test coverage gaps identified in v4 review:\n- Add 10 unit tests for reset(), handleKeyEvent(), trySetDirection()\n- Add mutex protection to Render() reads (LOW priority fix)\n- Target: game package coverage 40%+ (from 15.6%)\nEOF\n)\""
+  }
+
+[2026-04-17T09:07:21.278Z] <<< Tool result (id=call_af2ad20de8ea438eae2d91cb)
+  [feature/sub-feature 140fdf4] docs: add plan-v6 for test coverage improvements
+   1 file changed, 310 insertions(+)
+   create mode 100644 .woali/fp-7a49a536-abef-4df4-83d4-f201ce7f47e3/plan-v6.md
+
+[2026-04-17T09:07:25.149Z] <<< Claude (thinking)
+  Now push.
+
+[2026-04-17T09:07:25.776Z] >>> Tool: Bash (id=call_6c71a6215bfc4b35809754b8)
+  {
+    "command": "git push 2>&1"
+  }
+
+[2026-04-17T09:07:29.888Z] <<< Tool result (id=call_6c71a6215bfc4b35809754b8)
+  To github.com:Caplost/snake.git
+     40032aa..140fdf4  feature/sub-feature -> feature/sub-feature
+
+[2026-04-17T09:07:34.874Z] <<< Claude (thinking)
+  The push succeeded. Let me summarize what was done.
+
+[?1006l[?1003l[?1002l[?1000l[>4m[<u[?1004l[?2004l[?25h[?25h
