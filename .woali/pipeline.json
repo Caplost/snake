@@ -1,5 +1,5 @@
 {
   "pipelineId": "fp-c5dd9b1b-a10a-4315-8340-449e919d7830",
-  "stage": "plan",
+  "stage": "code",
   "apiUrl": "http://127.0.0.1:5100"
 }
