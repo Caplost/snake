@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"math/rand"
 	"sync"
 	"time"
 
@@ -18,7 +17,7 @@ type Game struct {
 	gameOver bool
 	snake    *snake.Snake
 	food     *food.Food
-	mu       sync.Mutex
+	mu       sync.RWMutex
 }
 
 func New() *Game {
@@ -111,6 +110,9 @@ func (g *Game) Update() {
 }
 
 func (g *Game) Render() {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 
 	// Draw corners
@@ -153,7 +155,6 @@ func (g *Game) Render() {
 }
 
 func (g *Game) reset() {
-	rand.Seed(time.Now().UnixNano())
 	g.mu.Lock()
 	g.snake = snake.New(constants.GridSize/2, constants.GridSize/2)
 	g.food.Generate(constants.GridSize, g.snake)
